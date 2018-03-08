@@ -26,10 +26,12 @@
 }
 
 #pragma mark - Decode
+// wwt 是否可以解压
 - (BOOL)canDecodeFromData:(nullable NSData *)data {
     return ([NSData sd_imageFormatForImageData:data] == SDImageFormatGIF);
 }
 
+// wwt 解压图片
 - (UIImage *)decodedImageWithData:(NSData *)data {
     if (!data) {
         return nil;
@@ -88,7 +90,7 @@
     return animatedImage;
 #endif
 }
-
+// wwt 帧持续时间
 - (float)sd_frameDurationAtIndex:(NSUInteger)index source:(CGImageSourceRef)source {
     float frameDuration = 0.1f;
     CFDictionaryRef cfFrameProperties = CGImageSourceCopyPropertiesAtIndex(source, index, nil);
@@ -121,6 +123,7 @@
     return frameDuration;
 }
 
+// wwt gif 不支持
 - (UIImage *)decompressedImageWithImage:(UIImage *)image
                                    data:(NSData *__autoreleasing  _Nullable *)data
                                 options:(nullable NSDictionary<NSString*, NSObject*>*)optionsDict {
@@ -129,10 +132,12 @@
 }
 
 #pragma mark - Encode
+// wwt 是否支持编码
 - (BOOL)canEncodeToFormat:(SDImageFormat)format {
     return (format == SDImageFormatGIF);
 }
 
+// wwt 编码图片
 - (NSData *)encodedDataWithImage:(UIImage *)image format:(SDImageFormat)format {
     if (!image) {
         return nil;

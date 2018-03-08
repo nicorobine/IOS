@@ -10,9 +10,13 @@
 #import "SDWebImageDownloader.h"
 #import "SDWebImageOperation.h"
 
+// wwt 开始下载通知
 FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadStartNotification;
+// wwt 接收到请求的响应通知
 FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadReceiveResponseNotification;
+// wwt 下载停止的通知
 FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadStopNotification;
+// wwt 下载完成的通知
 FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadFinishNotification;
 
 
@@ -75,6 +79,7 @@ FOUNDATION_EXPORT NSString * _Nonnull const SDWebImageDownloadFinishNotification
 @property (assign, nonatomic, readonly) SDWebImageDownloaderOptions options;
 
 /**
+ * wwt 数据预期的大小
  * The expected size of data.
  */
 @property (assign, nonatomic) NSInteger expectedSize;

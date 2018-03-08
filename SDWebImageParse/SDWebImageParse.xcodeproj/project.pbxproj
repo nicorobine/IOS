@@ -241,9 +241,9 @@
 			isa = PBXGroup;
 			children = (
 				83FEC7E020440D82007CD617 /* SDWebImageDownloaderOperation.h */,
-				83FEC7EA20440D82007CD617 /* SDWebImageDownloader.m */,
 				83FEC7FE20440D83007CD617 /* SDWebImageDownloaderOperation.m */,
 				83FEC80620440D83007CD617 /* SDWebImageDownloader.h */,
+				83FEC7EA20440D82007CD617 /* SDWebImageDownloader.m */,
 			);
 			name = Downloader;
 			sourceTree = "<group>";

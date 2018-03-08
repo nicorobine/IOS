@@ -13,23 +13,27 @@
 
 typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
     /**
+     * wwt 默认情况下，当一个URL下载失败会会把这个URL加入黑名单，SD不会再尝试下载，设置了这个标志，不使用黑名单
      * By default, when a URL fail to be downloaded, the URL is blacklisted so the library won't keep trying.
      * This flag disable this blacklisting.
      */
     SDWebImageRetryFailed = 1 << 0,
 
     /**
+     * wwt 默认情况下图像下载在用户界面交互的时候启动，此标志禁止此功能；例如在UIScrollView减速的时候延迟下载
      * By default, image downloads are started during UI interactions, this flags disable this feature,
      * leading to delayed download on UIScrollView deceleration for instance.
      */
     SDWebImageLowPriority = 1 << 1,
 
     /**
+     * wwt 只在内存中缓存
      * This flag disables on-disk caching after the download finished, only cache in memory
      */
     SDWebImageCacheMemoryOnly = 1 << 2,
 
     /**
+     * wwt 这个标志代表图片会像浏览器做的那样，在下载中逐行显示。默认情况下下载完成显示
      * This flag enables progressive download, the image is displayed progressively during download as a browser would do.
      * By default, the image is only displayed once completely downloaded.
      */
@@ -46,36 +50,42 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
     SDWebImageRefreshCached = 1 << 4,
 
     /**
+     * wwt 支持后台下载
      * In iOS 4+, continue the download of the image if the app goes to background. This is achieved by asking the system for
      * extra time in background to let the request finish. If the background task expires the operation will be cancelled.
      */
     SDWebImageContinueInBackground = 1 << 5,
 
     /**
+     * wwt 处理cookies
      * Handles cookies stored in NSHTTPCookieStore by setting
      * NSMutableURLRequest.HTTPShouldHandleCookies = YES;
      */
     SDWebImageHandleCookies = 1 << 6,
 
     /**
+     * wwt 是否允许无效的SSL证书
      * Enable to allow untrusted SSL certificates.
      * Useful for testing purposes. Use with caution in production.
      */
     SDWebImageAllowInvalidSSLCertificates = 1 << 7,
 
     /**
+     * wwt 默认情况下，图片队列顺序加载。这个标志会将图片放到队列前边
      * By default, images are loaded in the order in which they were queued. This flag moves them to
      * the front of the queue.
      */
     SDWebImageHighPriority = 1 << 8,
     
     /**
+     * wwt 默认情况下占位图像在图像加载的过程中已经加载了。这个标识将占位图片延时加载，知道图片加载完毕 🤔️
      * By default, placeholder images are loaded while the image is loading. This flag will delay the loading
      * of the placeholder image until after the image has finished loading.
      */
     SDWebImageDelayPlaceholder = 1 << 9,
 
     /**
+     * 通常，我们在动图时我们不调用transformDownloadedImage代理，因为大部分转换代码会破坏它。使用这个标识会强制转换
      * We usually don't call transformDownloadedImage delegate method on animated images,
      * as most transformation code would mangle it.
      * Use this flag to transform them anyway.
@@ -83,6 +93,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
     SDWebImageTransformAnimatedImage = 1 << 10,
     
     /**
+     * 默认情况下，图片在下载完成后会直接添加到iamgeView。但是在一些情况下，我们手动添加（添加过滤器，或者淡入淡出动画等）。如果想要手动设置图像，使用这个标识
      * By default, image is added to the imageView after download. But in some cases, we want to
      * have the hand before setting the image (apply a filter or add it with cross-fade animation for instance)
      * Use this flag if you want to manually set the image in the completion when success
@@ -90,6 +101,7 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
     SDWebImageAvoidAutoSetImage = 1 << 11,
     
     /**
+     * wwt 如果图片过大，则压缩图片。逐行下载图片模式下无效
      * By default, images are decoded respecting their original size. On iOS, this flag will scale down the
      * images to a size compatible with the constrained memory of devices.
      * If `SDWebImageProgressiveDownload` flag is set the scale down is deactivated.
@@ -97,22 +109,26 @@ typedef NS_OPTIONS(NSUInteger, SDWebImageOptions) {
     SDWebImageScaleDownLargeImages = 1 << 12,
     
     /**
+     * wwt 默认情况下当内存中有图片缓存的时候我们不去硬盘查询图片，这个掩码会强制同时查询硬盘。建议和SDWebImageQueryDiskSync一起使用，确保图像在同一个runloop中加载
      * By default, we do not query disk data when the image is cached in memory. This mask can force to query disk data at the same time.
      * This flag is recommend to be used with `SDWebImageQueryDiskSync` to ensure the image is loaded in the same runloop.
      */
     SDWebImageQueryDataWhenInMemory = 1 << 13,
     
     /**
+     * wwt 默认情况下我们同步查询内存缓存，异步查询硬盘缓存。这个掩码可以强制同步产讯硬盘缓存，用来确保查询和图片加载在同一个runloop
      * By default, we query the memory cache synchronously, disk cache asynchronously. This mask can force to query disk cache synchronously to ensure that image is loaded in the same runloop.
      * This flag can avoid flashing during cell reuse if you disable memory cache or in some other cases.
      */
     SDWebImageQueryDiskSync = 1 << 14,
     
     /**
+     * wwt 默认情况下，当缓存丢失后，图像从网络下载。这个标识将会防止从网络缓存中加载
      * By default, when the cache missed, the image is download from the network. This flag can prevent network to load from cache only.
      */
     SDWebImageFromCacheOnly = 1 << 15,
     /**
+     * wwt 默认情况下，我们使用SDWebImageTransition在图像下载完成后做一些视图转换，而视图转换只应用于下载的图片。这个掩码可以强制应用于从缓存中获取的图片
      * By default, when you use `SDWebImageTransition` to do some view transition after the image load finished, this transition is only applied for image download from the network. This mask can force to apply view transition for memory and disk cache as well.
      */
     SDWebImageForceTransition = 1 << 16
@@ -122,6 +138,7 @@ typedef void(^SDExternalCompletionBlock)(UIImage * _Nullable image, NSError * _N
 
 typedef void(^SDInternalCompletionBlock)(UIImage * _Nullable image, NSData * _Nullable data, NSError * _Nullable error, SDImageCacheType cacheType, BOOL finished, NSURL * _Nullable imageURL);
 
+// wwt 根据url生成字符串key的block
 typedef NSString * _Nullable (^SDWebImageCacheKeyFilterBlock)(NSURL * _Nullable url);
 
 
@@ -132,6 +149,7 @@ typedef NSString * _Nullable (^SDWebImageCacheKeyFilterBlock)(NSURL * _Nullable 
 @optional
 
 /**
+ * wwt 当图像从缓存中找不到的时候，可以控制那些图片被下载。这个方法在图像下载之前调用
  * Controls which image should be downloaded when the image is not found in the cache.
  *
  * @param imageManager The current `SDWebImageManager`
@@ -142,6 +160,7 @@ typedef NSString * _Nullable (^SDWebImageCacheKeyFilterBlock)(NSURL * _Nullable 
 - (BOOL)imageManager:(nonnull SDWebImageManager *)imageManager shouldDownloadImageForURL:(nullable NSURL *)imageURL;
 
 /**
+ * wwt 允许在刚下载下来的时候直接转换图片，在内存和硬盘缓存之前。@note 在GlobalQueue回调，为了防止阻塞主线程
  * Allows to transform the image immediately after it has been downloaded and just before to cache it on disk and memory.
  * NOTE: This method is called from a global queue in order to not to block the main thread.
  *
@@ -203,6 +222,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
 @property (nonatomic, copy, nullable) SDWebImageCacheKeyFilterBlock cacheKeyFilter;
 
 /**
+ * wwt 单例模式
  * Returns global SDWebImageManager instance.
  *
  * @return SDWebImageManager shared instance
@@ -210,12 +230,14 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
 + (nonnull instancetype)sharedManager;
 
 /**
+ * wwt 可以自定义缓存和下载器
  * Allows to specify instance of cache and image downloader used with image manager.
  * @return new instance of `SDWebImageManager` with specified cache and downloader.
  */
 - (nonnull instancetype)initWithCache:(nonnull SDImageCache *)cache downloader:(nonnull SDWebImageDownloader *)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
+ * wwt 如果从缓存中找不到就利用URL下载
  * Downloads the image at the given URL if not present in cache or return the cached version otherwise.
  *
  * @param url            The URL to the image
@@ -246,6 +268,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
                                             completed:(nullable SDInternalCompletionBlock)completedBlock;
 
 /**
+ * wwt 将图像缓存到缓存
  * Saves image to cache for given URL
  *
  * @param image The image to cache
@@ -256,16 +279,19 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
 - (void)saveImageToCache:(nullable UIImage *)image forURL:(nullable NSURL *)url;
 
 /**
+ * wwt 取消所有正在运行的op
  * Cancel all current operations
  */
 - (void)cancelAll;
 
 /**
+ * wwt 检查是否也有op正在运行
  * Check one or more operations running
  */
 - (BOOL)isRunning;
 
 /**
+ *  wwt 异步检查图像是否已经被缓存了
  *  Async check if image has already been cached
  *
  *  @param url              image url
@@ -277,6 +303,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
                      completion:(nullable SDWebImageCheckCacheCompletionBlock)completionBlock;
 
 /**
+ *  wwt 异步的检查图片是否只在硬盘上缓存了
  *  Async check if image has already been cached on disk only
  *
  *  @param url              image url
@@ -289,6 +316,7 @@ SDWebImageManager *manager = [SDWebImageManager sharedManager];
 
 
 /**
+ * wwt 根据URL返回缓存图片的key
  *Return the cache key for a given URL
  */
 - (nullable NSString *)cacheKeyForURL:(nullable NSURL *)url;

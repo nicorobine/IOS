@@ -45,14 +45,17 @@
 }
 
 #pragma mark - Decode
+// wwt 根据是不是webP类型判断是否可以解压
 - (BOOL)canDecodeFromData:(nullable NSData *)data {
     return ([NSData sd_imageFormatForImageData:data] == SDImageFormatWebP);
 }
 
+// wwt 是否可以逐行解压
 - (BOOL)canIncrementallyDecodeFromData:(NSData *)data {
     return ([NSData sd_imageFormatForImageData:data] == SDImageFormatWebP);
 }
 
+// wwt 解压图片
 - (UIImage *)decodedImageWithData:(NSData *)data {
     if (!data) {
         return nil;
