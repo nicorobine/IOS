@@ -231,8 +231,8 @@
 		83FEC7E720440D82007CD617 /* FLAnimatedImage */ = {
 			isa = PBXGroup;
 			children = (
-				83FEC7E820440D82007CD617 /* FLAnimatedImageView+WebCache.m */,
 				83FEC7E920440D82007CD617 /* FLAnimatedImageView+WebCache.h */,
+				83FEC7E820440D82007CD617 /* FLAnimatedImageView+WebCache.m */,
 			);
 			path = FLAnimatedImage;
 			sourceTree = "<group>";
