@@ -10,4 +10,8 @@
 
 @interface Case8DataEntity : NSObject
 
+@property (nonatomic, strong) NSString *content;
+@property (nonatomic, assign) BOOL expanded;
+@property (nonatomic, assign) CGFloat cellHeight;
+
 @end
