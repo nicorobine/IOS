@@ -14,6 +14,8 @@
 		8316D39C206DE6AA00676629 /* NBCoordinateTransformTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D39B206DE6AA00676629 /* NBCoordinateTransformTestViewController.m */; };
 		8316D3A9206E1CF200676629 /* NBVisualEffectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D3A8206E1CF200676629 /* NBVisualEffectViewController.m */; };
 		8316D3AC206E34C600676629 /* NBMaskTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D3AB206E34C600676629 /* NBMaskTestViewController.m */; };
+		8316D3B0207207FA00676629 /* NBTransform2DViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D3AF207207FA00676629 /* NBTransform2DViewController.m */; };
+		8316D3B32072081C00676629 /* NBTransForm3DViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D3B22072081C00676629 /* NBTransForm3DViewController.m */; };
 		837D9597206A3B9E0018102A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D9596206A3B9E0018102A /* AppDelegate.m */; };
 		837D959D206A3B9E0018102A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 837D959B206A3B9E0018102A /* Main.storyboard */; };
 		837D959F206A3B9E0018102A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 837D959E206A3B9E0018102A /* Assets.xcassets */; };
@@ -23,6 +25,10 @@
 		837D95BD206A3CB40018102A /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D95BC206A3CB40018102A /* MainViewController.m */; };
 		837D95C2206A3E7E0018102A /* NBViewAnimationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D95C1206A3E7E0018102A /* NBViewAnimationViewController.m */; };
 		837D95C6206B685F0018102A /* NBCALayerTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D95C5206B685F0018102A /* NBCALayerTestViewController.m */; };
+		83807FB1209C5295002D3F4B /* NBCAGradientLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83807FB0209C5295002D3F4B /* NBCAGradientLayerViewController.m */; };
+		8393D0FE20931D83008BB781 /* NBCAShapeLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8393D0FD20931D83008BB781 /* NBCAShapeLayerViewController.m */; };
+		83C6D0282084954F00170676 /* NBTransformSolidViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83C6D0272084954F00170676 /* NBTransformSolidViewController.m */; };
+		83D571F0209C0BD000FFD475 /* UIView+NBTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D571EF209C0BCF00FFD475 /* UIView+NBTransform.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +56,10 @@
 		8316D3A8206E1CF200676629 /* NBVisualEffectViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBVisualEffectViewController.m; sourceTree = "<group>"; };
 		8316D3AA206E34C600676629 /* NBMaskTestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBMaskTestViewController.h; sourceTree = "<group>"; };
 		8316D3AB206E34C600676629 /* NBMaskTestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBMaskTestViewController.m; sourceTree = "<group>"; };
+		8316D3AE207207FA00676629 /* NBTransform2DViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBTransform2DViewController.h; sourceTree = "<group>"; };
+		8316D3AF207207FA00676629 /* NBTransform2DViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBTransform2DViewController.m; sourceTree = "<group>"; };
+		8316D3B12072081C00676629 /* NBTransForm3DViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBTransForm3DViewController.h; sourceTree = "<group>"; };
+		8316D3B22072081C00676629 /* NBTransForm3DViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBTransForm3DViewController.m; sourceTree = "<group>"; };
 		837D9592206A3B9E0018102A /* Animation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Animation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		837D9595206A3B9E0018102A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		837D9596206A3B9E0018102A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -67,6 +77,14 @@
 		837D95C1206A3E7E0018102A /* NBViewAnimationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBViewAnimationViewController.m; sourceTree = "<group>"; };
 		837D95C4206B685F0018102A /* NBCALayerTestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCALayerTestViewController.h; sourceTree = "<group>"; };
 		837D95C5206B685F0018102A /* NBCALayerTestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCALayerTestViewController.m; sourceTree = "<group>"; };
+		83807FAF209C5295002D3F4B /* NBCAGradientLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCAGradientLayerViewController.h; sourceTree = "<group>"; };
+		83807FB0209C5295002D3F4B /* NBCAGradientLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCAGradientLayerViewController.m; sourceTree = "<group>"; };
+		8393D0FC20931D83008BB781 /* NBCAShapeLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCAShapeLayerViewController.h; sourceTree = "<group>"; };
+		8393D0FD20931D83008BB781 /* NBCAShapeLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCAShapeLayerViewController.m; sourceTree = "<group>"; };
+		83C6D0262084954F00170676 /* NBTransformSolidViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBTransformSolidViewController.h; sourceTree = "<group>"; };
+		83C6D0272084954F00170676 /* NBTransformSolidViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBTransformSolidViewController.m; sourceTree = "<group>"; };
+		83D571EE209C0BCF00FFD475 /* UIView+NBTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+NBTransform.h"; sourceTree = "<group>"; };
+		83D571EF209C0BCF00FFD475 /* UIView+NBTransform.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIView+NBTransform.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,6 +179,28 @@
 			path = VisualEffect;
 			sourceTree = "<group>";
 		};
+		8316D3AD207207D600676629 /* Transform */ = {
+			isa = PBXGroup;
+			children = (
+				8316D3AE207207FA00676629 /* NBTransform2DViewController.h */,
+				8316D3AF207207FA00676629 /* NBTransform2DViewController.m */,
+				8316D3B12072081C00676629 /* NBTransForm3DViewController.h */,
+				8316D3B22072081C00676629 /* NBTransForm3DViewController.m */,
+				83C6D0262084954F00170676 /* NBTransformSolidViewController.h */,
+				83C6D0272084954F00170676 /* NBTransformSolidViewController.m */,
+			);
+			path = Transform;
+			sourceTree = "<group>";
+		};
+		83230C10209C4EAD0050C797 /* CAGradientLayer */ = {
+			isa = PBXGroup;
+			children = (
+				83807FAF209C5295002D3F4B /* NBCAGradientLayerViewController.h */,
+				83807FB0209C5295002D3F4B /* NBCAGradientLayerViewController.m */,
+			);
+			path = CAGradientLayer;
+			sourceTree = "<group>";
+		};
 		837D9589206A3B9E0018102A = {
 			isa = PBXGroup;
 			children = (
@@ -242,6 +282,8 @@
 		837D95C3206B683A0018102A /* CALayerTestController */ = {
 			isa = PBXGroup;
 			children = (
+				8393D0FA20931D3D008BB781 /* subClasses */,
+				8316D3AD207207D600676629 /* Transform */,
 				8316D3A6206E1C8700676629 /* VisualEffect */,
 				8316D399206DE62700676629 /* CoordinateTransform */,
 				8316D395206C8AB500676629 /* CALayerProperties */,
@@ -250,6 +292,26 @@
 				8316D384206B80E600676629 /* BaseViewController */,
 			);
 			path = CALayerTestController;
+			sourceTree = "<group>";
+		};
+		8393D0FA20931D3D008BB781 /* subClasses */ = {
+			isa = PBXGroup;
+			children = (
+				83230C10209C4EAD0050C797 /* CAGradientLayer */,
+				8393D0FB20931D49008BB781 /* CAShapeLayer */,
+			);
+			path = subClasses;
+			sourceTree = "<group>";
+		};
+		8393D0FB20931D49008BB781 /* CAShapeLayer */ = {
+			isa = PBXGroup;
+			children = (
+				8393D0FC20931D83008BB781 /* NBCAShapeLayerViewController.h */,
+				8393D0FD20931D83008BB781 /* NBCAShapeLayerViewController.m */,
+				83D571EE209C0BCF00FFD475 /* UIView+NBTransform.h */,
+				83D571EF209C0BCF00FFD475 /* UIView+NBTransform.m */,
+			);
+			path = CAShapeLayer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -356,13 +418,19 @@
 			files = (
 				837D95C2206A3E7E0018102A /* NBViewAnimationViewController.m in Sources */,
 				8316D398206C8DD600676629 /* NBCALayerContentsViewController.m in Sources */,
+				83807FB1209C5295002D3F4B /* NBCAGradientLayerViewController.m in Sources */,
 				837D95A5206A3B9E0018102A /* main.m in Sources */,
+				8316D3B0207207FA00676629 /* NBTransform2DViewController.m in Sources */,
 				837D95BD206A3CB40018102A /* MainViewController.m in Sources */,
 				8316D3AC206E34C600676629 /* NBMaskTestViewController.m in Sources */,
+				8316D3B32072081C00676629 /* NBTransForm3DViewController.m in Sources */,
 				8316D38D206B853900676629 /* NBBezierPathTestViewController.m in Sources */,
 				837D95C6206B685F0018102A /* NBCALayerTestViewController.m in Sources */,
 				8316D3A9206E1CF200676629 /* NBVisualEffectViewController.m in Sources */,
+				8393D0FE20931D83008BB781 /* NBCAShapeLayerViewController.m in Sources */,
+				83C6D0282084954F00170676 /* NBTransformSolidViewController.m in Sources */,
 				8316D390206B858A00676629 /* NBBezierView.m in Sources */,
+				83D571F0209C0BD000FFD475 /* UIView+NBTransform.m in Sources */,
 				8316D39C206DE6AA00676629 /* NBCoordinateTransformTestViewController.m in Sources */,
 				837D9597206A3B9E0018102A /* AppDelegate.m in Sources */,
 				8316D387206B811000676629 /* NBCALayerTestTableViewController.m in Sources */,

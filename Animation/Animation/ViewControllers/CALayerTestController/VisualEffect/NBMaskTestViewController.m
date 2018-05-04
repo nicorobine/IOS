@@ -21,6 +21,11 @@ static const NSUInteger count = 3;
 @property (nonatomic, strong) CALayer* textLayer;
 
 @property (weak, nonatomic) IBOutlet UILabel *magnificationFilterLabel;
+@property (weak, nonatomic) IBOutlet UIButton *btn1;
+@property (weak, nonatomic) IBOutlet UIButton *btn2;
+
+@property (nonatomic, strong) UILabel *label1;
+@property (nonatomic, strong) UILabel *label2;
 @end
 
 @implementation NBMaskTestViewController
@@ -30,8 +35,12 @@ static const NSUInteger count = 3;
     
     index = 0;
     
+    self.view.backgroundColor = [UIColor lightGrayColor];
+    
     [self.view.layer addSublayer:self.imgLayer];
     [self.view.layer addSublayer:self.textLayer];
+    [self.btn1 addSubview:self.label1];
+    [self.btn2 addSubview:self.label2];
 }
 - (IBAction)showOrHiddenMask:(UIButton *)sender {
     
@@ -105,6 +114,29 @@ static const NSUInteger count = 3;
     }
     
     return _textLayer;
+}
+
+- (UILabel *)label1
+{
+    if (!_label1) {
+        
+        _label1 = [[UILabel alloc] initWithFrame:CGRectMake(10, 8, 100, 24)];
+        _label1.text = @"Hello Word";
+        _label1.alpha = 0.5;
+    }
+    
+    return _label1;
+}
+
+- (UILabel *)label2
+{
+    if (!_label2) {
+        
+        _label2 = [[UILabel alloc] initWithFrame:CGRectMake(10, 8, 100, 24)];
+        _label2.text = @"Hello Word";
+    }
+    
+    return _label2;
 }
 
 @end
