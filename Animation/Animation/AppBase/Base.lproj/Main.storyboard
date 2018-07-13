@@ -396,6 +396,33 @@
                                             <segue destination="06D-oX-Kyx" kind="push" id="MgB-5M-CAe"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" textLabel="myQ-TB-10s" detailTextLabel="RiR-MH-9la" style="IBUITableViewCellStyleSubtitle" id="7WN-aH-Nsd">
+                                        <rect key="frame" x="0.0" y="440" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7WN-aH-Nsd" id="Vlb-FV-pbF">
+                                            <rect key="frame" x="0.0" y="0.0" width="341" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="CAEmitterLayer" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="myQ-TB-10s">
+                                                    <rect key="frame" x="16" y="5" width="119.5" height="20.5"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="CALayer的子类，实现发射器的效果" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="RiR-MH-9la">
+                                                    <rect key="frame" x="16" y="25.5" width="194.5" height="14.5"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="gpe-4g-Ahf" kind="push" id="Rot-Zk-LAq"/>
+                                        </connections>
+                                    </tableViewCell>
                                 </cells>
                             </tableViewSection>
                         </sections>
@@ -1028,6 +1055,21 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="21f-J6-xt2" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="631" y="2170"/>
+        </scene>
+        <!--CAEmitterLayerTest-->
+        <scene sceneID="gc5-yB-NWp">
+            <objects>
+                <viewController title="CAEmitterLayerTest" id="gpe-4g-Ahf" customClass="NBCAEmitterLayerViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Tbc-mV-gcg">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="VWG-RM-Q0O"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="WlM-rb-iL4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1044" y="2170"/>
         </scene>
         <!--UIBezierPath-->
         <scene sceneID="aVt-Nm-1xv">
