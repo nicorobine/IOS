@@ -690,32 +690,50 @@ static void YYCGDataProviderReleaseDataCallback(void *info, const void *data, si
  
  @warning This method support iOS7.0 and later. If call it on iOS6, it just returns NO.
  CG_AVAILABLE_STARTING(__MAC_10_9, __IPHONE_7_0)
+ 
+ @note 将图片使用特定的格式解压成位图缓存
  */
 static BOOL YYCGImageDecodeToBitmapBufferWithAnyFormat(CGImageRef srcImage, vImage_Buffer *dest, vImage_CGImageFormat *destFormat) {
+    // 如果没有原图，没有vImageConvert_AnyToAny方法（iOS7才支持）,没有目标格式或者没有目标缓存直接返回失败
     if (!srcImage || (((long)vImageConvert_AnyToAny) + 1 == 1) || !destFormat || !dest) return NO;
+    // 获取图片的大小
     size_t width = CGImageGetWidth(srcImage);
     size_t height = CGImageGetHeight(srcImage);
     if (width == 0 || height == 0) return NO;
+    // 写入数据之前，dest缓存应该是空的
     dest->data = NULL;
     
     vImage_Error error = kvImageNoError;
+    // 原图像的data数据
     CFDataRef srcData = NULL;
+    // 格式转换器
     vImageConverterRef convertor = NULL;
+    // 原图片的格式
     vImage_CGImageFormat srcFormat = {0};
+    // 获取组成每个分量占用的位数
     srcFormat.bitsPerComponent = (uint32_t)CGImageGetBitsPerComponent(srcImage);
+    // 每个像素占用的位置
     srcFormat.bitsPerPixel = (uint32_t)CGImageGetBitsPerPixel(srcImage);
+    // 图片的颜色空间
     srcFormat.colorSpace = CGImageGetColorSpace(srcImage);
+    // 图片的位图信息
     srcFormat.bitmapInfo = CGImageGetBitmapInfo(srcImage) | CGImageGetAlphaInfo(srcImage);
     
+    // 初始化格式转换器
     convertor = vImageConverter_CreateWithCGImageFormat(&srcFormat, destFormat, NULL, kvImageNoFlags, NULL);
     if (!convertor) goto fail;
     
+    // 初始化数据提供者
     CGDataProviderRef srcProvider = CGImageGetDataProvider(srcImage);
+    // 复制数据提供者的数据 🤔️不知道为什么注释了decode
     srcData = srcProvider ? CGDataProviderCopyData(srcProvider) : NULL; // decode
+    // 获取数据长度
     size_t srcLength = srcData ? CFDataGetLength(srcData) : 0;
+    // 获取数据指针
     const void *srcBytes = srcData ? CFDataGetBytePtr(srcData) : NULL;
     if (srcLength == 0 || !srcBytes) goto fail;
     
+    // 初始化原图缓存
     vImage_Buffer src = {0};
     src.data = (void *)srcBytes;
     src.width = width;
@@ -725,6 +743,7 @@ static BOOL YYCGImageDecodeToBitmapBufferWithAnyFormat(CGImageRef srcImage, vIma
     error = vImageBuffer_Init(dest, height, width, 32, kvImageNoFlags);
     if (error != kvImageNoError) goto fail;
     
+    // 将原图缓存使用转换器转换为dest缓存图
     error = vImageConvert_AnyToAny(convertor, &src, dest, NULL, kvImageNoFlags); // convert
     if (error != kvImageNoError) goto fail;
     
@@ -749,18 +768,27 @@ fail:
  @param bitmapInfo Destination bitmap format.
  
  @return Whether succeed.
+ 
+ @note 使用32位格式将图片解压成位图缓存
  */
 static BOOL YYCGImageDecodeToBitmapBufferWith32BitFormat(CGImageRef srcImage, vImage_Buffer *dest, CGBitmapInfo bitmapInfo) {
+    // 没有图片源和目标直接返回
     if (!srcImage || !dest) return NO;
+    // 获取图片大小
     size_t width = CGImageGetWidth(srcImage);
     size_t height = CGImageGetHeight(srcImage);
     if (width == 0 || height == 0) return NO;
     
+    // 是否包含alpha通道
     BOOL hasAlpha = NO;
+    // alpha通道在颜色分量的第一位 AGRB和RGBA的区别
     BOOL alphaFirst = NO;
+    // 每个颜色分量是否已经预乘了alpha
     BOOL alphaPremultiplied = NO;
+    // 是否是一般的字节序列
     BOOL byteOrderNormal = NO;
     
+    // 根据位图信息确认alpha信息
     switch (bitmapInfo & kCGBitmapAlphaInfoMask) {
         case kCGImageAlphaPremultipliedLast: {
             hasAlpha = YES;
@@ -788,6 +816,7 @@ static BOOL YYCGImageDecodeToBitmapBufferWith32BitFormat(CGImageRef srcImage, vI
         } break;
     }
     
+    // 确定字节序列
     switch (bitmapInfo & kCGBitmapByteOrderMask) {
         case kCGBitmapByteOrderDefault: {
             byteOrderNormal = YES;
@@ -806,36 +835,54 @@ static BOOL YYCGImageDecodeToBitmapBufferWith32BitFormat(CGImageRef srcImage, vI
      Try convert with vImageConvert_AnyToAny() (avaliable since iOS 7.0).
      If fail, try decode with CGContextDrawImage().
      CGBitmapContext use a premultiplied alpha format, unpremultiply may lose precision.
+     @note 先尝试使用vImageConvert_AnyToAny()转换（iOS7.0），如果失败了，使用CGContextDrawImage()
+     CGBitmapContext使用了预乘的alpha，没有预乘alpla可能会丢失精度
      */
+    // 目标图像格式
     vImage_CGImageFormat destFormat = {0};
+    // 每个组成元素8位
     destFormat.bitsPerComponent = 8;
+    // 每个像素元素32位
     destFormat.bitsPerPixel = 32;
+    // 颜色空间
     destFormat.colorSpace = YYCGColorSpaceGetDeviceRGB();
+    // 位图信息
     destFormat.bitmapInfo = bitmapInfo;
     dest->data = NULL;
+    // 解压成位图
     if (YYCGImageDecodeToBitmapBufferWithAnyFormat(srcImage, dest, &destFormat)) return YES;
     
+    // CGBitmapContext 只能使用预乘的alpha信息
     CGBitmapInfo contextBitmapInfo = bitmapInfo & kCGBitmapByteOrderMask;
     if (!hasAlpha || alphaPremultiplied) {
         contextBitmapInfo |= (bitmapInfo & kCGBitmapAlphaInfoMask);
     } else {
         contextBitmapInfo |= alphaFirst ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaPremultipliedLast;
     }
+    // 创建位图上下文
     CGContextRef context = CGBitmapContextCreate(NULL, width, height, 8, 0, YYCGColorSpaceGetDeviceRGB(), contextBitmapInfo);
     if (!context) goto fail;
     
+    // 将图片绘制到上下文（解码和转化）
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), srcImage); // decode and convert
+    // 每行的字节数
     size_t bytesPerRow = CGBitmapContextGetBytesPerRow(context);
+    // 大小
     size_t length = height * bytesPerRow;
+    // 获取图像数据指针
     void *data = CGBitmapContextGetData(context);
     if (length == 0 || !data) goto fail;
     
+    // 分配数据的空间
     dest->data = malloc(length);
+    // 设置大小
     dest->width = width;
     dest->height = height;
     dest->rowBytes = bytesPerRow;
     if (!dest->data) goto fail;
     
+    // 如果有alpha通道而且没有预乘，生成临时的bufeer，然后解除alpha预乘
+    // 反之将datacopy到预留的data空间
     if (hasAlpha && !alphaPremultiplied) {
         vImage_Buffer tmpSrc = {0};
         tmpSrc.data = data;
@@ -864,6 +911,7 @@ fail:
     return NO;
 }
 
+// 创建一个image的解压缩的copy
 CGImageRef YYCGImageCreateDecodedCopy(CGImageRef imageRef, BOOL decodeForDisplay) {
     if (!imageRef) return NULL;
     size_t width = CGImageGetWidth(imageRef);
@@ -913,53 +961,75 @@ CGImageRef YYCGImageCreateDecodedCopy(CGImageRef imageRef, BOOL decodeForDisplay
     }
 }
 
+// 创建一个image的仿射转换后的image
 CGImageRef YYCGImageCreateAffineTransformCopy(CGImageRef imageRef, CGAffineTransform transform, CGSize destSize, CGBitmapInfo destBitmapInfo) {
+    // 没有原图像直接返回
     if (!imageRef) return NULL;
+    // 获取原图片和目标图片的大小
     size_t srcWidth = CGImageGetWidth(imageRef);
     size_t srcHeight = CGImageGetHeight(imageRef);
     size_t destWidth = round(destSize.width);
     size_t destHeight = round(destSize.height);
     if (srcWidth == 0 || srcHeight == 0 || destWidth == 0 || destHeight == 0) return NULL;
     
+    // 声明临时数据提供者变量和目标数据提供者变量
     CGDataProviderRef tmpProvider = NULL, destProvider = NULL;
+    // 声明临时image和目标image变量
     CGImageRef tmpImage = NULL, destImage = NULL;
+    // 声明源图像，临时图像和目标图像的buffer
     vImage_Buffer src = {0}, tmp = {0}, dest = {0};
+    // 将图像解压成位图
     if(!YYCGImageDecodeToBitmapBufferWith32BitFormat(imageRef, &src, kCGImageAlphaFirst | kCGBitmapByteOrderDefault)) return NULL;
     
+    // 计算目标的每行字节
     size_t destBytesPerRow = YYImageByteAlign(destWidth * 4, 32);
+    // 临时buffer分配内存空间
     tmp.data = malloc(destHeight * destBytesPerRow);
     if (!tmp.data) goto fail;
     
+    // 临时buffer设置
     tmp.width = destWidth;
     tmp.height = destHeight;
     tmp.rowBytes = destBytesPerRow;
+    
+    // 仿射转换信息
     vImage_CGAffineTransform vTransform = *((vImage_CGAffineTransform *)&transform);
+    // 设置转换的背景色
     uint8_t backColor[4] = {0};
+    // 转换到临时buffer
     vImage_Error error = vImageAffineWarpCG_ARGB8888(&src, &tmp, NULL, &vTransform, backColor, kvImageBackgroundColorFill);
     if (error != kvImageNoError) goto fail;
     free(src.data);
     src.data = NULL;
     
+    // 初始化临时位图提供对象
     tmpProvider = CGDataProviderCreateWithData(tmp.data, tmp.data, destHeight * destBytesPerRow, YYCGDataProviderReleaseDataCallback);
     if (!tmpProvider) goto fail;
+    // 临时buffer的data指向NULL，但是data仍被tmpProvider持有
     tmp.data = NULL; // hold by provider
+    
+    // 创建临时图像
     tmpImage = CGImageCreate(destWidth, destHeight, 8, 32, destBytesPerRow, YYCGColorSpaceGetDeviceRGB(), kCGImageAlphaFirst | kCGBitmapByteOrderDefault, tmpProvider, NULL, false, kCGRenderingIntentDefault);
     if (!tmpImage) goto fail;
     CFRelease(tmpProvider);
     tmpProvider = NULL;
     
+    // 如果位图信息满足kCGImageAlphaFirst 且 不满足kCGBitmapByteOrder32Little，直接返回临时图片
     if ((destBitmapInfo & kCGBitmapAlphaInfoMask) == kCGImageAlphaFirst &&
         (destBitmapInfo & kCGBitmapByteOrderMask) != kCGBitmapByteOrder32Little) {
         return tmpImage;
     }
     
+    // 将临时图像解压到目标buffer
     if (!YYCGImageDecodeToBitmapBufferWith32BitFormat(tmpImage, &dest, destBitmapInfo)) goto fail;
     CFRelease(tmpImage);
     tmpImage = NULL;
     
+    // 初始化目标数据提供者
     destProvider = CGDataProviderCreateWithData(dest.data, dest.data, destHeight * destBytesPerRow, YYCGDataProviderReleaseDataCallback);
     if (!destProvider) goto fail;
     dest.data = NULL; // hold by provider
+    // 生成目标image
     destImage = CGImageCreate(destWidth, destHeight, 8, 32, destBytesPerRow, YYCGColorSpaceGetDeviceRGB(), destBitmapInfo, destProvider, NULL, false, kCGRenderingIntentDefault);
     if (!destImage) goto fail;
     CFRelease(destProvider);
@@ -977,6 +1047,7 @@ fail:
     return NULL;
 }
 
+// 将EXIF转换为UIImageOrientation
 UIImageOrientation YYUIImageOrientationFromEXIFValue(NSInteger value) {
     switch (value) {
         case kCGImagePropertyOrientationUp: return UIImageOrientationUp;
@@ -991,6 +1062,7 @@ UIImageOrientation YYUIImageOrientationFromEXIFValue(NSInteger value) {
     }
 }
 
+// 将UIImageOrientation转换为EXIF
 NSInteger YYUIImageOrientationToEXIFValue(UIImageOrientation orientation) {
     switch (orientation) {
         case UIImageOrientationUp: return kCGImagePropertyOrientationUp;
@@ -1005,15 +1077,23 @@ NSInteger YYUIImageOrientationToEXIFValue(UIImageOrientation orientation) {
     }
 }
 
+// 创建一个image的copy
 CGImageRef YYCGImageCreateCopyWithOrientation(CGImageRef imageRef, UIImageOrientation orientation, CGBitmapInfo destBitmapInfo) {
+    // 没有原始图像直接返回
     if (!imageRef) return NULL;
+    // 如果方向向上，返回原图片的retain
     if (orientation == UIImageOrientationUp) return (CGImageRef)CFRetain(imageRef);
     
+    // 获取原图片的大小
     size_t width = CGImageGetWidth(imageRef);
     size_t height = CGImageGetHeight(imageRef);
     
+    // 声明转换
     CGAffineTransform transform = CGAffineTransformIdentity;
+    // 是否交换高度和宽度
     BOOL swapWidthAndHeight = NO;
+    
+    // 设置仿射转换
     switch (orientation) {
         case UIImageOrientationDown: {
             transform = CGAffineTransformMakeRotation(YYImageDegreesToRadians(180));
@@ -1052,22 +1132,27 @@ CGImageRef YYCGImageCreateCopyWithOrientation(CGImageRef imageRef, UIImageOrient
     }
     if (CGAffineTransformIsIdentity(transform)) return (CGImageRef)CFRetain(imageRef);
     
+    // 是否切换宽度和高度
     CGSize destSize = {width, height};
     if (swapWidthAndHeight) {
         destSize.width = height;
         destSize.height = width;
     }
     
+    // 进行进行转换
     return YYCGImageCreateAffineTransformCopy(imageRef, transform, destSize, destBitmapInfo);
 }
 
+// 利用图像压缩类型
 YYImageType YYImageDetectType(CFDataRef data) {
     if (!data) return YYImageTypeUnknown;
     uint64_t length = CFDataGetLength(data);
     if (length < 16) return YYImageTypeUnknown;
     
+    // 获取数据指针
     const char *bytes = (char *)CFDataGetBytePtr(data);
     
+    // 获取前32位
     uint32_t magic4 = *((uint32_t *)bytes);
     switch (magic4) {
         case YY_FOUR_CC(0x4D, 0x4D, 0x00, 0x2A): { // big endian TIFF
@@ -1138,6 +1223,7 @@ YYImageType YYImageDetectType(CFDataRef data) {
     return YYImageTypeUnknown;
 }
 
+// 将YYImageType转换为UTI
 CFStringRef YYImageTypeToUTType(YYImageType type) {
     switch (type) {
         case YYImageTypeJPEG: return kUTTypeJPEG;
@@ -1151,7 +1237,7 @@ CFStringRef YYImageTypeToUTType(YYImageType type) {
         default: return NULL;
     }
 }
-
+// 将UTI转换为YYImageType
 YYImageType YYImageTypeFromUTType(CFStringRef uti) {
     static NSDictionary *dic;
     static dispatch_once_t onceToken;
@@ -1170,6 +1256,7 @@ YYImageType YYImageTypeFromUTType(CFStringRef uti) {
     return num.unsignedIntegerValue;
 }
 
+// 根据YYImageType获取图像后缀
 NSString *YYImageTypeGetExtension(YYImageType type) {
     switch (type) {
         case YYImageTypeJPEG: return @"jpg";
@@ -1185,10 +1272,12 @@ NSString *YYImageTypeGetExtension(YYImageType type) {
     }
 }
 
+// 将图片进行编码
 CFDataRef YYCGImageCreateEncodedData(CGImageRef imageRef, YYImageType type, CGFloat quality) {
     if (!imageRef) return nil;
     quality = quality < 0 ? 0 : quality > 1 ? 1 : quality;
-    
+ 
+    // 如果支持WebP则对WebP类型的图片编码，如果不支持返回NULL
     if (type == YYImageTypeWebP) {
 #if YYIMAGE_WEBP_ENABLED
         if (quality == 1) {
@@ -1201,17 +1290,22 @@ CFDataRef YYCGImageCreateEncodedData(CGImageRef imageRef, YYImageType type, CGFl
 #endif
     }
     
+    // 转换成UTI类型
     CFStringRef uti = YYImageTypeToUTType(type);
     if (!uti) return nil;
     
+    // 初始化可变数据
     CFMutableDataRef data = CFDataCreateMutable(CFAllocatorGetDefault(), 0);
     if (!data) return NULL;
+    // 初始化图像目标变量
     CGImageDestinationRef dest = CGImageDestinationCreateWithData(data, uti, 1, NULL);
     if (!dest) {
         CFRelease(data);
         return NULL;
     }
+    // 确定压缩比
     NSDictionary *options = @{(id)kCGImageDestinationLossyCompressionQuality : @(quality) };
+    // 位图像目标添加图片 这个方法应该会直接将imageRef压缩成data
     CGImageDestinationAddImage(dest, imageRef, (CFDictionaryRef)options);
     if (!CGImageDestinationFinalize(dest)) {
         CFRelease(data);
@@ -1233,30 +1327,43 @@ BOOL YYImageWebPAvailable() {
     return YES;
 }
 
+// 压缩WebP图片
 CFDataRef YYCGImageCreateEncodedWebPData(CGImageRef imageRef, BOOL lossless, CGFloat quality, int compressLevel, YYImagePreset preset) {
+    // 做一些验证判断是否可以压缩成WebP
     if (!imageRef) return nil;
     size_t width = CGImageGetWidth(imageRef);
     size_t height = CGImageGetHeight(imageRef);
     if (width == 0 || width > WEBP_MAX_DIMENSION) return nil;
     if (height == 0 || height > WEBP_MAX_DIMENSION) return nil;
     
+    // 声明buffer变量
     vImage_Buffer buffer = {0};
+    // 将图片解压到buffer
     if(!YYCGImageDecodeToBitmapBufferWith32BitFormat(imageRef, &buffer, kCGImageAlphaLast | kCGBitmapByteOrderDefault)) return nil;
     
+    // 初始化WebP变量
     WebPConfig config = {0};
     WebPPicture picture = {0};
     WebPMemoryWriter writer = {0};
     CFDataRef webpData = NULL;
     BOOL pictureNeedFree = NO;
     
+    // 压缩质量
     quality = quality < 0 ? 0 : quality > 1 ? 1 : quality;
+    // 预置压缩成图片大小
     preset = preset > YYImagePresetText ? YYImagePresetDefault : preset;
+    // 压缩等级
     compressLevel = compressLevel < 0 ? 0 : compressLevel > 6 ? 6 : compressLevel;
+    // 初始化WebP设置
     if (!WebPConfigPreset(&config, (WebPPreset)preset, quality)) goto fail;
     
+    // 质量从0-1变为0-100
     config.quality = round(quality * 100.0);
+    // 是否是无损的
     config.lossless = lossless;
+    // 压缩等级
     config.method = compressLevel;
+    // 图片预置大小
     switch ((WebPPreset)preset) {
         case WEBP_PRESET_DEFAULT: {
             config.image_hint = WEBP_HINT_DEFAULT;
@@ -1273,8 +1380,10 @@ CFDataRef YYCGImageCreateEncodedWebPData(CGImageRef imageRef, BOOL lossless, CGF
             config.image_hint = WEBP_HINT_GRAPH;
         } break;
     }
+    // 验证设置是否有效
     if (!WebPValidateConfig(&config)) goto fail;
     
+    // 初始化webpPicture
     if (!WebPPictureInit(&picture)) goto fail;
     pictureNeedFree = YES;
     picture.width = (int)buffer.width;
@@ -1282,11 +1391,13 @@ CFDataRef YYCGImageCreateEncodedWebPData(CGImageRef imageRef, BOOL lossless, CGF
     picture.use_argb = lossless;
     if(!WebPPictureImportRGBA(&picture, buffer.data, (int)buffer.rowBytes)) goto fail;
     
+    // 初始化writter
     WebPMemoryWriterInit(&writer);
     picture.writer = WebPMemoryWrite;
     picture.custom_ptr = &writer;
     if(!WebPEncode(&config, &picture)) goto fail;
     
+    // 获取webpData
     webpData = CFDataCreate(CFAllocatorGetDefault(), writer.mem, writer.size);
     free(writer.mem);
     WebPPictureFree(&picture);
@@ -1310,6 +1421,7 @@ NSUInteger YYImageGetWebPFrameCount(CFDataRef webpData) {
     return webpFrameCount;
 }
 
+// 根据webpData生成image图片
 CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
                                        BOOL decodeForDisplay,
                                        BOOL useThreads,
@@ -1318,10 +1430,13 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     /*
      Call WebPDecode() on a multi-frame webp data will get an error (VP8_STATUS_UNSUPPORTED_FEATURE).
      Use WebPDemuxer to unpack it first.
+     @note 直接使用WebPDecode()方法解压多帧的webP数据会报错，需要先使用webpDemuxer打开封装
      */
+    // 声明webpData变量和多帧webp图片解压缩器
     WebPData data = {0};
     WebPDemuxer *demuxer = NULL;
     
+    // 声明帧数，画布大小变量
     int frameCount = 0, canvasWidth = 0, canvasHeight = 0;
     WebPIterator iter = {0};
     BOOL iterInited = NO;
@@ -1508,18 +1623,27 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     // 递归锁
     pthread_mutex_t _lock; // recursive lock
     
+    // 是否知道源数据的类型
     BOOL _sourceTypeDetected;
+    // 源图片
     CGImageSourceRef _source;
+    // png信息
     yy_png_info *_apngSource;
 #if YYIMAGE_WEBP_ENABLED
     WebPDemuxer *_webpSource;
 #endif
     
+    // 图片方向
     UIImageOrientation _orientation;
+    // 帧锁
     dispatch_semaphore_t _framesLock;
+    // 🤔️
     NSArray *_frames; ///< Array<GGImageDecoderFrame>, without image
+    // 是否需要混合
     BOOL _needBlend;
+    // 混合帧的索引
     NSUInteger _blendFrameIndex;
+    // 混合的画布
     CGContextRef _blendCanvas;
 }
 
@@ -1533,6 +1657,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     pthread_mutex_destroy(&_lock);
 }
 
+// 根据data生成解压器
 + (instancetype)decoderWithData:(NSData *)data scale:(CGFloat)scale {
     if (!data) return nil;
     YYImageDecoder *decoder = [[YYImageDecoder alloc] initWithScale:scale];
@@ -1545,16 +1670,22 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return [self initWithScale:[UIScreen mainScreen].scale];
 }
 
+// 根据比例初始化解压器
 - (instancetype)initWithScale:(CGFloat)scale {
     self = [super init];
     if (scale <= 0) scale = 1;
     _scale = scale;
     _framesLock = dispatch_semaphore_create(1);
+    // 创建递归锁
+    // @note 递归锁：允许在同一个线程对同一个锁获取多次，并通过对应次数的Unlock解锁，在未完全解锁的时候其他线程的请求在等待状态
+    //             当锁全部解除后，会根据线程优先级重新获取锁
     pthread_mutex_init_recursive(&_lock, true);
     return self;
 }
 
+// 更新数据
 - (BOOL)updateData:(NSData *)data final:(BOOL)final {
+    // 线程安全的更新数据
     BOOL result = NO;
     pthread_mutex_lock(&_lock);
     result = [self _updateData:data final:final];
@@ -1562,6 +1693,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return result;
 }
 
+// 获取指定索引的帧
 - (YYImageFrame *)frameAtIndex:(NSUInteger)index decodeForDisplay:(BOOL)decodeForDisplay {
     YYImageFrame *result = nil;
     pthread_mutex_lock(&_lock);
@@ -1570,6 +1702,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return result;
 }
 
+// 获取指定索引的帧持续时间
 - (NSTimeInterval)frameDurationAtIndex:(NSUInteger)index {
     NSTimeInterval result = 0;
     dispatch_semaphore_wait(_framesLock, DISPATCH_TIME_FOREVER);
@@ -1580,6 +1713,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return result;
 }
 
+// 获取指定帧的属性
 - (NSDictionary *)framePropertiesAtIndex:(NSUInteger)index {
     NSDictionary *result = nil;
     pthread_mutex_lock(&_lock);
@@ -1588,6 +1722,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return result;
 }
 
+// 获取图片的属性
 - (NSDictionary *)imageProperties {
     NSDictionary *result = nil;
     pthread_mutex_lock(&_lock);
@@ -1597,14 +1732,18 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
 }
 
 #pragma private (wrap)
-
+// 更新解压器的数据
 - (BOOL)_updateData:(NSData *)data final:(BOOL)final {
+    // 如果已经完成或者新数据的长度比老数据的长度小返回失败
     if (_finalized) return NO;
     if (data.length < _data.length) return NO;
+    // 实力变量赋值
     _finalized = final;
     _data = data;
     
+    // 获取图片类型
     YYImageType type = YYImageDetectType((__bridge CFDataRef)data);
+    // 判断是不是已经获取到了图片类型，如果没有对实力变量赋值，更新数据，如过已经赋值了判断是否更新
     if (_sourceTypeDetected) {
         if (_type != type) {
             return NO;
@@ -1621,18 +1760,28 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return YES;
 }
 
+// 获取指定索引的帧
 - (YYImageFrame *)_frameAtIndex:(NSUInteger)index decodeForDisplay:(BOOL)decodeForDisplay {
+    // 是否超出范围
     if (index >= _frames.count) return 0;
+    // 获取当前帧的copy
     _YYImageDecoderFrame *frame = [(_YYImageDecoderFrame *)_frames[index] copy];
+    // 是否解压了
     BOOL decoded = NO;
+    // 是否在画布展开
     BOOL extendToCanvas = NO;
+    
+    // ICO格式的图片各帧的大小可能不一样，不在画布展开
     if (_type != YYImageTypeICO && decodeForDisplay) { // ICO contains multi-size frame and should not extend to canvas.
         extendToCanvas = YES;
     }
     
+    // 不需要混合
     if (!_needBlend) {
+        // 获取不混合的图像
         CGImageRef imageRef = [self _newUnblendedImageAtIndex:index extendToCanvas:extendToCanvas decoded:&decoded];
         if (!imageRef) return nil;
+        // 如果需要解压显示而且生成图片的时候没有解压，解压图像
         if (decodeForDisplay && !decoded) {
             CGImageRef imageRefDecoded = YYCGImageCreateDecodedCopy(imageRef, YES);
             if (imageRefDecoded) {
@@ -1641,25 +1790,31 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
                 decoded = YES;
             }
         }
+        // 生成image图像
         UIImage *image = [UIImage imageWithCGImage:imageRef scale:_scale orientation:_orientation];
         CFRelease(imageRef);
         if (!image) return nil;
+        // 设置图像是否解压了
         image.isDecodedForDisplay = decoded;
         frame.image = image;
         return frame;
     }
     
     // blend
+    // 创建混合的画布
     if (![self _createBlendContextIfNeeded]) return nil;
     CGImageRef imageRef = NULL;
     
+    // 如果上一帧绘制好了，绘制这一帧
     if (_blendFrameIndex + 1 == frame.index) {
         imageRef = [self _newBlendedImageWithFrame:frame];
         _blendFrameIndex = index;
     } else { // should draw canvas from previous frame
+        // 如果上一帧的索引找不到，清空画布
         _blendFrameIndex = NSNotFound;
         CGContextClearRect(_blendCanvas, CGRectMake(0, 0, _width, _height));
         
+        // 如果帧开始渲染的索引和当前的索引相同，则直接绘制到画布上，并且根据disopose决定是否清空画布
         if (frame.blendFromIndex == frame.index) {
             CGImageRef unblendedImage = [self _newUnblendedImageAtIndex:index extendToCanvas:NO decoded:NULL];
             if (unblendedImage) {
@@ -1671,7 +1826,9 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
                 CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
             }
             _blendFrameIndex = index;
-        } else { // canvas is not ready
+        }
+        // 🤔️
+        else { // canvas is not ready
             for (uint32_t i = (uint32_t)frame.blendFromIndex; i <= (uint32_t)frame.index; i++) {
                 if (i == frame.index) {
                     if (!imageRef) imageRef = [self _newBlendedImageWithFrame:frame];
@@ -1683,6 +1840,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
         }
     }
     
+    // 生成UIImage对象和_YYImageDecoderFrame对象
     if (!imageRef) return nil;
     UIImage *image = [UIImage imageWithCGImage:imageRef scale:_scale orientation:_orientation];
     CFRelease(imageRef);
@@ -1701,6 +1859,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return frame;
 }
 
+// 获取指定帧的属性
 - (NSDictionary *)_framePropertiesAtIndex:(NSUInteger)index {
     if (index >= _frames.count) return nil;
     if (!_source) return nil;
@@ -1708,7 +1867,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     if (!properties) return nil;
     return CFBridgingRelease(properties);
 }
-
+// 获取图像的属性
 - (NSDictionary *)_imageProperties {
     if (!_source) return nil;
     CFDictionaryRef properties = CGImageSourceCopyProperties(_source, NULL);
@@ -1717,7 +1876,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
 }
 
 #pragma private
-
+// 更新数据源
 - (void)_updateSource {
     switch (_type) {
         case YYImageTypeWebP: {
@@ -1937,7 +2096,9 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     dispatch_semaphore_signal(_framesLock);
 }
 
+// 通过imageIO更新数据
 - (void)_updateSourceImageIO {
+    // 初始化数据
     _width = 0;
     _height = 0;
     _orientation = UIImageOrientationUp;
@@ -1946,6 +2107,8 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     _frames = nil;
     dispatch_semaphore_signal(_framesLock);
     
+    // 如果不存在_source根据是否是完整图片数据创建或者更新源图片数据
+    // 如果存在_source 更新_source
     if (!_source) {
         if (_finalized) {
             _source = CGImageSourceCreateWithData((__bridge CFDataRef)_data, NULL);
@@ -1958,20 +2121,27 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
     if (!_source) return;
     
+    // 获取帧数
     _frameCount = CGImageSourceGetCount(_source);
     if (_frameCount == 0) return;
     
+    // 在数据不完整的时候忽略多帧
     if (!_finalized) { // ignore multi-frame before finalized
         _frameCount = 1;
     } else {
+        // PNG只有一帧
         if (_type == YYImageTypePNG) { // use custom apng decoder and ignore multi-frame
             _frameCount = 1;
         }
+        // 如果是GIF图片获取循环次数
         if (_type == YYImageTypeGIF) { // get gif loop count
+            // 获取_source的属性
             CFDictionaryRef properties = CGImageSourceCopyProperties(_source, NULL);
             if (properties) {
+                // 获取GIF属性
                 CFDictionaryRef gif = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);
                 if (gif) {
+                    // 获取循环次数
                     CFTypeRef loop = CFDictionaryGetValue(gif, kCGImagePropertyGIFLoopCount);
                     if (loop) CFNumberGetValue(loop, kCFNumberNSIntegerType, &_loopCount);
                 }
@@ -1982,9 +2152,11 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     
     /*
      ICO, GIF, APNG may contains multi-frame.
+     处理多帧图片
      */
     NSMutableArray *frames = [NSMutableArray new];
     for (NSUInteger i = 0; i < _frameCount; i++) {
+        // 生成_YYImageDecoderFrame对象
         _YYImageDecoderFrame *frame = [_YYImageDecoderFrame new];
         frame.index = i;
         frame.blendFromIndex = i;
@@ -1992,16 +2164,22 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
         frame.isFullSize = YES;
         [frames addObject:frame];
         
+        // 获取_source属性
         CFDictionaryRef properties = CGImageSourceCopyPropertiesAtIndex(_source, i, NULL);
         if (properties) {
+            // 声明一些相关的属性变量
             NSTimeInterval duration = 0;
             NSInteger orientationValue = 0, width = 0, height = 0;
             CFTypeRef value = NULL;
             
+            // 获取宽度（像素）
             value = CFDictionaryGetValue(properties, kCGImagePropertyPixelWidth);
             if (value) CFNumberGetValue(value, kCFNumberNSIntegerType, &width);
+            // 获取高度（像素）
             value = CFDictionaryGetValue(properties, kCGImagePropertyPixelHeight);
             if (value) CFNumberGetValue(value, kCFNumberNSIntegerType, &height);
+            
+            // 如果是GIF图片，获取帧持续时间
             if (_type == YYImageTypeGIF) {
                 CFDictionaryRef gif = CFDictionaryGetValue(properties, kCGImagePropertyGIFDictionary);
                 if (gif) {
@@ -2019,6 +2197,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
             frame.height = height;
             frame.duration = duration;
             
+            // 如果画布大小没有赋值给画布大小赋值
             if (i == 0 && _width + _height == 0) { // init first frame
                 _width = width;
                 _height = height;
@@ -2031,24 +2210,32 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
             CFRelease(properties);
         }
     }
+    // 帧锁
     dispatch_semaphore_wait(_framesLock, DISPATCH_TIME_FOREVER);
     _frames = frames;
     dispatch_semaphore_signal(_framesLock);
 }
 
+// 获取不展开的帧图像
 - (CGImageRef)_newUnblendedImageAtIndex:(NSUInteger)index
                          extendToCanvas:(BOOL)extendToCanvas
                                 decoded:(BOOL *)decoded CF_RETURNS_RETAINED {
-    
+    // 如果没有完成返回NULL
     if (!_finalized && index > 0) return NULL;
     if (_frames.count <= index) return NULL;
+    // 获取要处理的帧
     _YYImageDecoderFrame *frame = _frames[index];
     
+    // 如果有_source根据_source生成图像
     if (_source) {
         CGImageRef imageRef = CGImageSourceCreateImageAtIndex(_source, index, (CFDictionaryRef)@{(id)kCGImageSourceShouldCache:@(YES)});
+        
+        // 如果需要展开到画布
         if (imageRef && extendToCanvas) {
+            // 获取图像大小
             size_t width = CGImageGetWidth(imageRef);
             size_t height = CGImageGetHeight(imageRef);
+            // 如果画布大小与图像大小相同，解压图像
             if (width == _width && height == _height) {
                 CGImageRef imageRefExtended = YYCGImageCreateDecodedCopy(imageRef, YES);
                 if (imageRefExtended) {
@@ -2057,6 +2244,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
                     if (decoded) *decoded = YES;
                 }
             } else {
+                // 生成上下文，并将在上下文解压图像
                 CGContextRef context = CGBitmapContextCreate(NULL, _width, _height, 8, 0, YYCGColorSpaceGetDeviceRGB(), kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst);
                 if (context) {
                     CGContextDrawImage(context, CGRectMake(0, _height - height, width, height), imageRef);
@@ -2073,6 +2261,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
         return imageRef;
     }
     
+    // 如果是apng类型的source
     if (_apngSource) {
         uint32_t size = 0;
         uint8_t *bytes = yy_png_copy_frame_data_at_index(_data.bytes, _apngSource, (uint32_t)index, &size);
@@ -2196,6 +2385,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return NULL;
 }
 
+// 创建混合的上下文
 - (BOOL)_createBlendContextIfNeeded {
     if (!_blendCanvas) {
         _blendFrameIndex = NSNotFound;
@@ -2205,6 +2395,8 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return suc;
 }
 
+// 混合帧
+// @note 根据disopse类型和blend类型，决定是否清空画布
 - (void)_blendImageWithFrame:(_YYImageDecoderFrame *)frame {
     if (frame.dispose == YYImageDisposePrevious) {
         // nothing
@@ -2228,32 +2420,45 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
 }
 
+// 根据图像解压器帧生成图像
 - (CGImageRef)_newBlendedImageWithFrame:(_YYImageDecoderFrame *)frame CF_RETURNS_RETAINED{
     CGImageRef imageRef = NULL;
     if (frame.dispose == YYImageDisposePrevious) {
         if (frame.blend == YYImageBlendOver) {
+            // 获取当前画布上的图像
             CGImageRef previousImage = CGBitmapContextCreateImage(_blendCanvas);
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 将当前帧的图像绘制到画布上
             if (unblendImage) {
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取混合后的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
+            // 将画板清空
             CGContextClearRect(_blendCanvas, CGRectMake(0, 0, _width, _height));
+            // 再将原来的图像绘制到画板
             if (previousImage) {
                 CGContextDrawImage(_blendCanvas, CGRectMake(0, 0, _width, _height), previousImage);
                 CFRelease(previousImage);
             }
         } else {
+            // 获取当前画布上的图像
             CGImageRef previousImage = CGBitmapContextCreateImage(_blendCanvas);
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 清空画板，然后将当前帧的图像绘制到画板上
             if (unblendImage) {
                 CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取画板上的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
+            // 清空画板的内容
             CGContextClearRect(_blendCanvas, CGRectMake(0, 0, _width, _height));
+            // 将原来的图像绘制到画板上
             if (previousImage) {
                 CGContextDrawImage(_blendCanvas, CGRectMake(0, 0, _width, _height), previousImage);
                 CFRelease(previousImage);
@@ -2261,38 +2466,52 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
         }
     } else if (frame.dispose == YYImageDisposeBackground) {
         if (frame.blend == YYImageBlendOver) {
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 将当前帧的图像绘制到画布
             if (unblendImage) {
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取当前画布上的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
+            // 清空画布
             CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
         } else {
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 先清空画布在把图像绘制到画布上
             if (unblendImage) {
                 CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取画布上的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
+            // 清空画布
             CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
         }
     } else { // no dispose
         if (frame.blend == YYImageBlendOver) {
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 绘制当前帧的图像到画布
             if (unblendImage) {
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取画布的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
         } else {
+            // 获取当前帧的图像
             CGImageRef unblendImage = [self _newUnblendedImageAtIndex:frame.index extendToCanvas:NO decoded:NULL];
+            // 先清理画布，然后把当前帧的图像绘制到画布
             if (unblendImage) {
                 CGContextClearRect(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height));
                 CGContextDrawImage(_blendCanvas, CGRectMake(frame.offsetX, frame.offsetY, frame.width, frame.height), unblendImage);
                 CFRelease(unblendImage);
             }
+            // 获取画布上的图像
             imageRef = CGBitmapContextCreateImage(_blendCanvas);
         }
     }
@@ -2310,17 +2529,20 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     NSMutableArray *_durations;
 }
 
+// 不支持直接初始化，需要使用带类型的初始化方法
 - (instancetype)init {
     @throw [NSException exceptionWithName:@"YYImageEncoder init error" reason:@"YYImageEncoder must be initialized with a type. Use 'initWithType:' instead." userInfo:nil];
     return [self initWithType:YYImageTypeUnknown];
 }
 
 - (instancetype)initWithType:(YYImageType)type {
+    // 不支持位置类型的压缩
     if (type == YYImageTypeUnknown || type >= YYImageTypeOther) {
         NSLog(@"[%s: %d] Unsupported image type:%d",__FUNCTION__, __LINE__, (int)type);
         return nil;
     }
     
+    // 不支持WebP类型的压缩
 #if !YYIMAGE_WEBP_ENABLED
     if (type == YYImageTypeWebP) {
         NSLog(@"[%s: %d] WebP is not available, check the documentation to see how to install WebP component: https://github.com/ibireme/YYImage#installation", __FUNCTION__, __LINE__);
@@ -2358,10 +2580,12 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return self;
 }
 
+// 设置压缩质量
 - (void)setQuality:(CGFloat)quality {
     _quality = quality < 0 ? 0 : quality > 1 ? 1 : quality;
 }
 
+// 根据UIImag添加图片
 - (void)addImage:(UIImage *)image duration:(NSTimeInterval)duration {
     if (!image.CGImage) return;
     duration = duration < 0 ? 0 : duration;
@@ -2369,6 +2593,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     [_durations addObject:@(duration)];
 }
 
+// 根据NSData添加图像
 - (void)addImageWithData:(NSData *)data duration:(NSTimeInterval)duration {
     if (data.length == 0) return;
     duration = duration < 0 ? 0 : duration;
@@ -2376,6 +2601,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     [_durations addObject:@(duration)];
 }
 
+// 根据图像路径添加图像
 - (void)addImageWithFile:(NSString *)path duration:(NSTimeInterval)duration {
     if (path.length == 0) return;
     duration = duration < 0 ? 0 : duration;
@@ -2385,6 +2611,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     [_durations addObject:@(duration)];
 }
 
+// 是否支持imageIO解压
 - (BOOL)_imageIOAvaliable {
     switch (_type) {
         case YYImageTypeJPEG:
@@ -2406,6 +2633,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
 }
 
+// 生成ImageDestination
 - (CGImageDestinationRef)_newImageDestination:(id)dest imageCount:(NSUInteger)count CF_RETURNS_RETAINED {
     if (!dest) return nil;
     CGImageDestinationRef destination = NULL;
@@ -2420,7 +2648,9 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return destination;
 }
 
+// 压缩图像
 - (void)_encodeImageWithDestination:(CGImageDestinationRef)destination imageCount:(NSUInteger)count {
+    // 如果是GIF图像生成属性，并添加为destination的属性
     if (_type == YYImageTypeGIF) {
         NSDictionary *gifProperty = @{(__bridge id)kCGImagePropertyGIFDictionary:
                                         @{(__bridge id)kCGImagePropertyGIFLoopCount: @(_loopCount)}};
@@ -2428,17 +2658,22 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
     
     for (int i = 0; i < count; i++) {
+        // 这里内存比较高，创建一个pool，及时释放内存
         @autoreleasepool {
             id imageSrc = _images[i];
             NSDictionary *frameProperty = NULL;
+            // 如果是GIF图片，设置每帧持续时间，GIF不支持压缩
+            // 其他图片设置压缩比
             if (_type == YYImageTypeGIF && count > 1) {
                 frameProperty = @{(NSString *)kCGImagePropertyGIFDictionary : @{(NSString *) kCGImagePropertyGIFDelayTime:_durations[i]}};
             } else {
                 frameProperty = @{(id)kCGImageDestinationLossyCompressionQuality : @(_quality)};
             }
             
+            // 根据imageScr的类型进行对应的压缩处理
             if ([imageSrc isKindOfClass:[UIImage class]]) {
                 UIImage *image = imageSrc;
+                // 如果需要，调整图像方向
                 if (image.imageOrientation != UIImageOrientationUp && image.CGImage) {
                     CGBitmapInfo info = CGImageGetBitmapInfo(image.CGImage) | CGImageGetAlphaInfo(image.CGImage);
                     CGImageRef rotated = YYCGImageCreateCopyWithOrientation(image.CGImage, image.imageOrientation, info);
@@ -2447,14 +2682,17 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
                         CFRelease(rotated);
                     }
                 }
+                // 添加到destination
                 if (image.CGImage) CGImageDestinationAddImage(destination, ((UIImage *)imageSrc).CGImage, (CFDictionaryRef)frameProperty);
             } else if ([imageSrc isKindOfClass:[NSURL class]]) {
+                // 根据source添加
                 CGImageSourceRef source = CGImageSourceCreateWithURL((CFURLRef)imageSrc, NULL);
                 if (source) {
                     CGImageDestinationAddImageFromSource(destination, source, 0, (CFDictionaryRef)frameProperty);
                     CFRelease(source);
                 }
             } else if ([imageSrc isKindOfClass:[NSData class]]) {
+                // 根据source添加
                 CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)imageSrc, NULL);
                 if (source) {
                     CGImageDestinationAddImageFromSource(destination, source, 0, (CFDictionaryRef)frameProperty);
@@ -2465,9 +2703,11 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
 }
 
+// 获取指定帧的图像copy
 - (CGImageRef)_newCGImageFromIndex:(NSUInteger)index decoded:(BOOL)decoded CF_RETURNS_RETAINED {
     UIImage *image = nil;
     id imageSrc= _images[index];
+    // 根据数据源类型获取UIImage图像
     if ([imageSrc isKindOfClass:[UIImage class]]) {
         image = imageSrc;
     } else if ([imageSrc isKindOfClass:[NSURL class]]) {
@@ -2476,6 +2716,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
         image = [UIImage imageWithData:imageSrc];
     }
     if (!image) return NULL;
+    // 对图像进行解压
     CGImageRef imageRef = image.CGImage;
     if (!imageRef) return NULL;
     if (image.imageOrientation != UIImageOrientationUp) {
@@ -2487,6 +2728,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return (CGImageRef)CFRetain(imageRef);
 }
 
+// 编码图像
 - (NSData *)_encodeWithImageIO {
     NSMutableData *data = [NSMutableData new];
     NSUInteger count = _type == YYImageTypeGIF ? _images.count : 1;
@@ -2504,6 +2746,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     }
 }
 
+// 根据图片路径使用imageIO压缩
 - (BOOL)_encodeWithImageIO:(NSString *)path {
     NSUInteger count = _type == YYImageTypeGIF ? _images.count : 1;
     CGImageDestinationRef destination = [self _newImageDestination:path imageCount:count];
@@ -2722,6 +2965,8 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return nil;
 #endif
 }
+
+// 编码图片
 - (NSData *)encode {
     if (_images.count == 0) return nil;
     
@@ -2731,6 +2976,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return nil;
 }
 
+// 将图像压缩并写入指定路径
 - (BOOL)encodeToFile:(NSString *)path {
     if (_images.count == 0 || path.length == 0) return NO;
     
@@ -2740,6 +2986,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return [data writeToFile:path atomically:YES];
 }
 
+// 解压指定图像
 + (NSData *)encodeImage:(UIImage *)image type:(YYImageType)type quality:(CGFloat)quality {
     YYImageEncoder *encoder = [[YYImageEncoder alloc] initWithType:type];
     encoder.quality = quality;
@@ -2747,6 +2994,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return [encoder encode];
 }
 
+// 使用指定的decoder解压
 + (NSData *)encodeImageWithDecoder:(YYImageDecoder *)decoder type:(YYImageType)type quality:(CGFloat)quality {
     if (!decoder || decoder.frameCount == 0) return nil;
     YYImageEncoder *encoder = [[YYImageEncoder alloc] initWithType:type];
@@ -2760,9 +3008,10 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
 
 @end
 
-
+// UIImage 分类
 @implementation UIImage (YYImageCoder)
 
+// 解压图像
 - (instancetype)imageByDecoded {
     if (self.isDecodedForDisplay) return self;
     CGImageRef imageRef = self.CGImage;
@@ -2776,6 +3025,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     return newImage;
 }
 
+// 动态绑定
 - (BOOL)isDecodedForDisplay {
     if (self.images.count > 1) return YES;
     NSNumber *num = objc_getAssociatedObject(self, @selector(isDecodedForDisplay));
@@ -2786,6 +3036,7 @@ CGImageRef YYCGImageCreateWithWebPData(CFDataRef webpData,
     objc_setAssociatedObject(self, @selector(isDecodedForDisplay), @(isDecodedForDisplay), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+// 保存到相册
 - (void)saveToAlbumWithCompletionBlock:(void(^)(NSURL *assetURL, NSError *error))completionBlock {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSData *data = [self _imageDataRepresentationForSystem:YES];
