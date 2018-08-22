@@ -692,6 +692,10 @@ static void YYCGDataProviderReleaseDataCallback(void *info, const void *data, si
  CG_AVAILABLE_STARTING(__MAC_10_9, __IPHONE_7_0)
  
  @note 将图片使用特定的格式解压成位图缓存
+ @note 获取srcImage的大小，获取srcImage的srcFormat，根据destFormat和srcFormat生成imageConverter转换器;
+       更具srcImage生成数据提供者（srcProvider），根据srcProvider获取srcImage的图像是srcData数据，数据长
+       度(srcLength)以及位数据的头指针(srcBytes)，生成src位图;根据宽度高度等生成初始化dest，将src通过生成的
+       imageConverter转换器转换成dest
  */
 static BOOL YYCGImageDecodeToBitmapBufferWithAnyFormat(CGImageRef srcImage, vImage_Buffer *dest, vImage_CGImageFormat *destFormat) {
     // 如果没有原图，没有vImageConvert_AnyToAny方法（iOS7才支持）,没有目标格式或者没有目标缓存直接返回失败
@@ -881,7 +885,7 @@ static BOOL YYCGImageDecodeToBitmapBufferWith32BitFormat(CGImageRef srcImage, vI
     dest->rowBytes = bytesPerRow;
     if (!dest->data) goto fail;
     
-    // 如果有alpha通道而且没有预乘，生成临时的bufeer，然后解除alpha预乘
+    // 如果有alpha通道而且没有预乘，生成临时的buffer，然后解除alpha预乘
     // 反之将datacopy到预留的data空间
     if (hasAlpha && !alphaPremultiplied) {
         vImage_Buffer tmpSrc = {0};
@@ -918,6 +922,7 @@ CGImageRef YYCGImageCreateDecodedCopy(CGImageRef imageRef, BOOL decodeForDisplay
     size_t height = CGImageGetHeight(imageRef);
     if (width == 0 || height == 0) return NULL;
     
+    // decodeForDisplay 绘制到位图上下文上，否者只生成图像
     if (decodeForDisplay) { //decode with redraw (may lose some precision)
         CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(imageRef) & kCGBitmapAlphaInfoMask;
         BOOL hasAlpha = NO;
