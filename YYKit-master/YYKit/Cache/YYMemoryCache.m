@@ -19,6 +19,8 @@
 #import "YYDispatchQueuePool.h"
 #endif
 
+// 如果导入了YYDispatchQueuePool类，则使用YYDispatchQueueGetForQOS获取队列
+// 如果没有导入获取golbal队列
 #ifdef YYDispatchQueuePool_h
 static inline dispatch_queue_t YYMemoryCacheGetReleaseQueue() {
     return YYDispatchQueueGetForQOS(NSQualityOfServiceUtility);

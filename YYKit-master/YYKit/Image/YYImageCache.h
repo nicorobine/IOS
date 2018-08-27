@@ -18,15 +18,19 @@ NS_ASSUME_NONNULL_BEGIN
 /// Image cache type
 typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
     /// No value.
+    // 不缓存
     YYImageCacheTypeNone   = 0,
     
     /// Get/store image with memory cache.
+    // 内存缓存
     YYImageCacheTypeMemory = 1 << 0,
     
     /// Get/store image with disk cache.
+    // 磁盘缓存
     YYImageCacheTypeDisk   = 1 << 1,
     
     /// Get/store image with both memory cache and disk cache.
+    // 内存缓存和磁盘缓存
     YYImageCacheTypeAll    = YYImageCacheTypeMemory | YYImageCacheTypeDisk,
 };
 
@@ -40,11 +44,18 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  * If the original image is animated gif, apng or webp, it will be saved as original format.
  * If the original image's scale is not 1, the scale value will be saved as extended data.
  
+ * 如果原始图片是静态图片，将会给予alpha通道信息将图片存在png/jpeg类型的图片
+ * 如果原始图片是动态gif、apng或者webp类型的动态图片，会以原始格式存储
+ * 如果原始图片的scale不是1，scale的值会在附加数据中存储
+ 
  Although UIImage can be serialized with NSCoding protocol, but it's not a good idea:
  Apple actually use UIImagePNGRepresentation() to encode all kind of image, it may 
  lose the original multi-frame data. The result is packed to plist file and cannot
  view with photo viewer directly. If the image has no alpha channel, using JPEG 
  instead of PNG can save more disk size and encoding/decoding time.
+ 
+ 当然UIImage类型的对象可以使用NSCoding协议储存，但是这不是一个号方法：
+ Apple实际上使用UIImagePNGRepresentation() 来编码所有类型的图片，着可能导致丢失原始多帧的数据。而且结果缓存在plist文件，并不能使用图片查看器直接查看。如果图片没有alpha通道，使用JPEG来代替PNG可以节省更多的磁盘空间、编码和解码时间。
  */
 @interface YYImageCache : NSObject
 
