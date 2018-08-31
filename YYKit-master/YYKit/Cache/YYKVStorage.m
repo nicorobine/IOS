@@ -20,14 +20,19 @@
 #import "sqlite3.h"
 #endif
 
-
+// 出现错误的最大尝试次数
 static const NSUInteger kMaxErrorRetryCount = 8;
+// 最小的尝试间隔
 static const NSTimeInterval kMinRetryTimeInterval = 2.0;
+// 最长全路径名的长度（减去64可能是为文件名做准备）
 static const int kPathLengthMax = PATH_MAX - 64;
+// 数据库文件的名字
 static NSString *const kDBFileName = @"manifest.sqlite";
 static NSString *const kDBShmFileName = @"manifest.sqlite-shm";
 static NSString *const kDBWalFileName = @"manifest.sqlite-wal";
+// 数据目录名字
 static NSString *const kDataDirectoryName = @"data";
+// 销毁目录的名字
 static NSString *const kTrashDirectoryName = @"trash";
 
 /*
@@ -63,20 +68,21 @@ static NSString *const kTrashDirectoryName = @"trash";
     dispatch_queue_t _trashQueue;
     
     NSString *_path;
-    NSString *_dbPath;
+    NSString *_dbPath;    // 数据库路径
     NSString *_dataPath;
     NSString *_trashPath;
     
     sqlite3 *_db;
     CFMutableDictionaryRef _dbStmtCache;
-    NSTimeInterval _dbLastOpenErrorTime;
-    NSUInteger _dbOpenErrorCount;
+    NSTimeInterval _dbLastOpenErrorTime;  // 上次打开失败时间
+    NSUInteger _dbOpenErrorCount;         // 数据库打开失败次数
 }
 
 
 #pragma mark - db
-
+// 打开数据库
 - (BOOL)_dbOpen {
+    // 如果已经存在_db直接返回
     if (_db) return YES;
     
     int result = sqlite3_open(_dbPath.UTF8String, &_db);

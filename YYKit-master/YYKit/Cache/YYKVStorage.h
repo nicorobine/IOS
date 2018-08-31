@@ -16,19 +16,35 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  YYKVStorageItem is used by `YYKVStorage` to store key-value pair and meta data.
  Typically, you should not use this class directly.
+ 给YYKVStorage类型的对象使用的item，不要直接使用
  */
 @interface YYKVStorageItem : NSObject
+// 保存的key
 @property (nonatomic, strong) NSString *key;                ///< key
+// 保存的value
 @property (nonatomic, strong) NSData *value;                ///< value
+// 保存的文件名字，如果小于内联阀值，则为nil
 @property (nullable, nonatomic, strong) NSString *filename; ///< filename (nil if inline)
+// 文件大小
 @property (nonatomic) int size;                             ///< value's size in bytes
+// 修改时间（UNIX时间戳）
 @property (nonatomic) int modTime;                          ///< modification unix timestamp
+// 访问时间（UNIX时间戳）
 @property (nonatomic) int accessTime;                       ///< last access unix timestamp
+// 扩展数据
 @property (nullable, nonatomic, strong) NSData *extendedData; ///< extended data (nil if no extended data)
 @end
 
 /**
  Storage type, indicated where the `YYKVStorageItem.value` stored.
+ 
+ YYKVStorageItem.value的储存类型
+ sqilte的写入速度高于文件，但是读取性能又数据的大小决定，作者测试当数据大于20k的时候从文件
+ 中读取数据的数独大于从sqite的读取速度
+ 
+ * 如果你想储存大量的小数据，使用sqlite
+ * 如果想储存大文件使用file
+ * 同时可以使用Mixed为每个item选择储存类型
  
  @discussion Typically, write data to sqlite is faster than extern file, but 
  reading performance is dependent on data size. In my test (on iPhone 6 64G), 
@@ -61,6 +77,11 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
  YYKVStorage is a key-value storage based on sqlite and file system.
  Typically, you should not use this class directly.
  
+ YYKVStorage是一个基于sqilte和文件系统的键值对缓存
+ 
+ 需要注意的是，这个类的实例不是线程安全的，你必须确保同义时间只能有一个线程能够访问到这个实例
+ 如果真的需要在多线程管理大量数据，你应该拆分数据到多个KVStorage实例（分片）
+ 
  @discussion The designated initializer for YYKVStorage is `initWithPath:type:`. 
  After initialized, a directory is created based on the `path` to hold key-value data.
  Once initialized you should not read or write this directory without the instance.
@@ -79,9 +100,11 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 ///=============================================================================
 /// @name Attribute
 ///=============================================================================
-
+// 缓存路径
 @property (nonatomic, readonly) NSString *path;        ///< The path of this storage.
+// 缓存类型
 @property (nonatomic, readonly) YYKVStorageType type;  ///< The type of this storage.
+// 是否允许错误日志
 @property (nonatomic) BOOL errorLogsEnabled;           ///< Set `YES` to enable error logs for debug.
 
 #pragma mark - Initializer
@@ -92,7 +115,12 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 + (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
 /**
- The designated initializer. 
+ The designated initializer.
+ 
+ 根据指定路径和类型实例化对象
+ 需要注意的是
+ 1.路径必须是全路径
+ 2.具有相同路径的多个实例将会使储存不稳定
  
  @param path  Full path of a directory in which the storage will write data. If
     the directory is not exists, it will try to create one, otherwise it will 
@@ -113,6 +141,14 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Save an item or update the item with 'key' if it already exists.
  
+ 保存item，如果item已经存在更新项目
+ 这个方法会保存item的key，value， fileName extentedData到sqilte或者disk，会忽略其他属性
+ item的key和value不能为空（nil或者长度为0）
+ 
+ 如果type是文件的话，filename不能为空
+ 如果type是sqlite的话，fileName会被忽略
+ 如果type是mixed，如果文件名字不为空的话会储存到文件系统，否则会储存到sqlite
+ 
  @discussion This method will save the item.key, item.value, item.filename and
  item.extendedData to disk or sqlite, other properties will be ignored. item.key 
  and item.value should not be empty (nil or zero length).
@@ -130,6 +166,9 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Save an item or update the item with 'key' if it already exists.
  
+ 保存一个item，如果已经存在，会根据key更新item
+ 这个方法只能将键值对储存到sqlite，如果_type的类型是YYKVStorageTypeFile，这个方法会失败
+ 
  @discussion This method will save the key-value pair to sqlite. If the `type` is
  YYKVStorageTypeFile, then this method will failed.
  
@@ -141,6 +180,12 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Save an item or update the item with 'key' if it already exists.
+ 
+ 保存一个item，如果已经存在，会根据key更新item
+ 
+ 如果type是File，fileName不能为空
+ 如果type是SQLite，fileName会被忽略
+ 如果type是Mixed，如果指定了fileName会储存到文件系统，否则会存入sqlite
  
  @discussion
  If the `type` is YYKVStorageTypeFile, then the `filename` should not be empty.
@@ -168,6 +213,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Remove an item with 'key'.
  
+ 根据key移除缓存
+ 
  @param key The item's key.
  @return Whether succeed.
  */
@@ -175,6 +222,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Remove items with an array of keys.
+ 
+ 根据keys移除缓存
  
  @param keys An array of specified keys.
  
@@ -185,6 +234,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Remove all items which `value` is larger than a specified size.
  
+ 移除item.value的大小比指定大小大的所有items
+ 
  @param size  The maximum size in bytes.
  @return Whether succeed.
  */
@@ -192,6 +243,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Remove all items which last access time is earlier than a specified timestamp.
+ 
+ 移除最近访问时间小于指定时间戳的的item
  
  @param time  The specified unix timestamp.
  @return Whether succeed.
@@ -202,6 +255,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
  Remove items to make the total size not larger than a specified size.
  The least recently used (LRU) items will be removed first.
  
+ 移除一些item，使缓存的总大小小于指定的大小，会优先移除满足LRU的item
+ 
  @param maxSize The specified size in bytes.
  @return Whether succeed.
  */
@@ -211,6 +266,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
  Remove items to make the total count not larger than a specified count.
  The least recently used (LRU) items will be removed first.
  
+ 移除一些item，使缓存的总数量小于指定的数量，会优先移除满足LRU的item
+ 
  @param maxCount The specified item count.
  @return Whether succeed.
  */
@@ -218,6 +275,10 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Remove all items in background queue.
+ 
+ 在后台队列里移除所有的item
+ 这个方法会将files和sqlite数据库移动到一个垃圾文件夹，然后在后台队列清除这个文件夹
+ 所以这个方法会比removeAllItemsWithProgressBlock:endBlock:快的多
  
  @discussion This method will remove the files and sqlite database to a trash
  folder, and then clear the folder in background queue. So this method is much 
@@ -229,6 +290,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Remove all items.
+ 
+ 移除所有的item，需要注意的是不要在这些block中给这个实例发送消息
  
  @warning You should not send message to this instance in these blocks.
  @param progress This block will be invoked during removing, pass nil to ignore.
@@ -246,6 +309,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Get item with a specified key.
  
+ 根据key获取item
+ 
  @param key A specified key.
  @return Item for the key, or nil if not exists / error occurs.
  */
@@ -255,6 +320,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
  Get item information with a specified key.
  The `value` in this item will be ignored.
  
+ 根据key获取item的信息，item的value会被忽略
+ 
  @param key A specified key.
  @return Item information for the key, or nil if not exists / error occurs.
  */
@@ -263,6 +330,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Get item value with a specified key.
  
+ 根据指定的key获取item的value，也就是缓存的对象
+ 
  @param key  A specified key.
  @return Item's value, or nil if not exists / error occurs.
  */
@@ -270,6 +339,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Get items with an array of keys.
+ 
+ 根据keys获取items
  
  @param keys  An array of specified keys.
  @return An array of `YYKVStorageItem`, or nil if not exists / error occurs.
@@ -280,6 +351,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
  Get item infomartions with an array of keys.
  The `value` in items will be ignored.
  
+ 根据keys获取items的信息
+ 
  @param keys  An array of specified keys.
  @return An array of `YYKVStorageItem`, or nil if not exists / error occurs.
  */
@@ -287,6 +360,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Get items value with an array of keys.
+ 
+ 根据keys获取items的value
  
  @param keys  An array of specified keys.
  @return A dictionary which key is 'key' and value is 'value', or nil if not 
@@ -302,6 +377,8 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 /**
  Whether an item exists for a specified key.
  
+ 判断指定key是否已经有缓存
+ 
  @param key  A specified key.
  
  @return `YES` if there's an item exists for the key, `NO` if not exists or an error occurs.
@@ -310,12 +387,14 @@ typedef NS_ENUM(NSUInteger, YYKVStorageType) {
 
 /**
  Get total item count.
+ 获取缓存的数量
  @return Total item count, -1 when an error occurs.
  */
 - (int)getItemsCount;
 
 /**
  Get item value's total size in bytes.
+ 获取已经缓存的大小
  @return Total size in bytes, -1 when an error occurs.
  */
 - (int)getItemsSize;
