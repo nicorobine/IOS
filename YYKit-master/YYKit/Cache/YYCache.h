@@ -25,17 +25,23 @@ NS_ASSUME_NONNULL_BEGIN
 @interface YYCache : NSObject
 
 /** The name of the cache, readonly. */
+// 缓存的名字
 @property (copy, readonly) NSString *name;
 
 /** The underlying memory cache. see `YYMemoryCache` for more information.*/
+// 内存缓存对象
 @property (strong, readonly) YYMemoryCache *memoryCache;
 
 /** The underlying disk cache. see `YYDiskCache` for more information.*/
+// 磁盘缓存对象
 @property (strong, readonly) YYDiskCache *diskCache;
 
 /**
  Create a new instance with the specified name.
  Multiple instances with the same name will make the cache unstable.
+ 
+ 根据名字创建内存缓存对象，同时会根据名字生成磁盘缓存的路径从而创建磁盘缓存对象
+ 需要注意的是名字相同的不同缓存对象可能会造成缓存不稳定
  
  @param name  The name of the cache. It will create a dictionary with the name in
      the app's caches dictionary for disk cache. Once initialized you should not 
@@ -47,6 +53,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Create a new instance with the specified path.
  Multiple instances with the same name will make the cache unstable.
+ 
+ 根据路径创建磁盘缓存对象，同时会根据路径的最后的组成元素创建内存缓存对象
+ 需要注意的是名字相同的不同缓存对象可能会造成缓存不稳定
  
  @param path  Full path of a directory in which the cache will write data.
      Once initialized you should not read and write to this directory.
