@@ -27,13 +27,16 @@
 #define MIN_PROGRESSIVE_BLUR_TIME_INTERVAL 0.4
 
 /// Returns YES if the right-bottom pixel is filled.
+// 返回右下角的像素是否被填充了
 static BOOL YYCGImageLastPixelFilled(CGImageRef image) {
     if (!image) return NO;
     size_t width = CGImageGetWidth(image);
     size_t height = CGImageGetHeight(image);
     if (width == 0 || height == 0) return NO;
+    // 创建一个大小为1*1的上下文
     CGContextRef ctx = CGBitmapContextCreate(NULL, 1, 1, 8, 0, YYCGColorSpaceGetDeviceRGB(), kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrderDefault);
     if (!ctx) return NO;
+    // 将image的右下角的一个像素绘制到上下文
     CGContextDrawImage(ctx, CGRectMake( -(int)width + 1, 0, width, height), image);
     uint8_t *bytes = CGBitmapContextGetData(ctx);
     BOOL isAlpha = bytes && bytes[0] == 0;
@@ -53,10 +56,11 @@ static NSData *JPEGSOSMarker() {
     return marker;
 }
 
-
+// URL黑名单
 static NSMutableSet *URLBlacklist;
+// URL黑名单锁
 static dispatch_semaphore_t URLBlacklistLock;
-
+// 初始化黑名单
 static void URLBlacklistInit() {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -65,6 +69,7 @@ static void URLBlacklistInit() {
     });
 }
 
+// 指定的URL是否在黑名单里
 static BOOL URLBlackListContains(NSURL *url) {
     if (!url || url == (id)[NSNull null]) return NO;
     URLBlacklistInit();
@@ -74,6 +79,7 @@ static BOOL URLBlackListContains(NSURL *url) {
     return contains;
 }
 
+// 黑名单里添加新的URL
 static void URLInBlackListAdd(NSURL *url) {
     if (!url || url == (id)[NSNull null]) return;
     URLBlacklistInit();
@@ -84,23 +90,39 @@ static void URLInBlackListAdd(NSURL *url) {
 
 
 @interface YYWebImageOperation() <NSURLConnectionDelegate>
+// 是否正在运行
 @property (readwrite, getter=isExecuting) BOOL executing;
+// 是否完成了
 @property (readwrite, getter=isFinished) BOOL finished;
+// 是否取消了
 @property (readwrite, getter=isCancelled) BOOL cancelled;
+// 是否开始了
 @property (readwrite, getter=isStarted) BOOL started;
+// 递归锁
 @property (nonatomic, strong) NSRecursiveLock *lock;
+// URL连接
 @property (nonatomic, strong) NSURLConnection *connection;
+// 下载的数据（可变）
 @property (nonatomic, strong) NSMutableData *data;
+// 预期的文件大小
 @property (nonatomic, assign) NSInteger expectedSize;
+// 后台任务的id
 @property (nonatomic, assign) UIBackgroundTaskIdentifier taskID;
 
+// 上次渐进解压的时间戳
 @property (nonatomic, assign) NSTimeInterval lastProgressiveDecodeTimestamp;
+// 图片解压器
 @property (nonatomic, strong) YYImageDecoder *progressiveDecoder;
+// 是否忽略渐进式
 @property (nonatomic, assign) BOOL progressiveIgnored;
+// 是否渐进式的检测
 @property (nonatomic, assign) BOOL progressiveDetected;
+// 渐进式的扫描长度
 @property (nonatomic, assign) NSUInteger progressiveScanedLength;
+// 渐渐式的显示计数
 @property (nonatomic, assign) NSUInteger progressiveDisplayCount;
 
+// 回调block
 @property (nonatomic, copy) YYWebImageProgressBlock progress;
 @property (nonatomic, copy) YYWebImageTransformBlock transform;
 @property (nonatomic, copy) YYWebImageCompletionBlock completion;

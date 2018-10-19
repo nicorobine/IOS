@@ -44,7 +44,7 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  * If the original image is animated gif, apng or webp, it will be saved as original format.
  * If the original image's scale is not 1, the scale value will be saved as extended data.
  
- * 如果原始图片是静态图片，将会给予alpha通道信息将图片存在png/jpeg类型的图片
+ * 如果原始图片是静态图片，将会基于alpha通道信息将图片存在png/jpeg类型的图片
  * 如果原始图片是动态gif、apng或者webp类型的动态图片，会以原始格式存储
  * 如果原始图片的scale不是1，scale的值会在附加数据中存储
  
@@ -68,13 +68,17 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 @property (nullable, copy) NSString *name;
 
 /** The underlying memory cache. see `YYMemoryCache` for more information.*/
+// 内存缓存
 @property (strong, readonly) YYMemoryCache *memoryCache;
 
 /** The underlying disk cache. see `YYDiskCache` for more information.*/
+// 硬盘缓存
 @property (strong, readonly) YYDiskCache *diskCache;
 
 /**
  Whether decode animated image when fetch image from disk cache. Default is YES.
+ 
+ 从磁盘中获取图片的时候是否解码同台图片，默认解码
  
  @discussion When fetch image from disk cache, it will use 'YYImage' to decode 
  animated image such as WebP/APNG/GIF. Set to 'NO' to ignore animated image.
@@ -84,6 +88,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 /**
  Whether decode the image to memory bitmap. Default is YES.
  
+ 是否将图片解码为内存位图，默认为YES
+ 
  @discussion If the value is YES, then the image will be decoded to memory bitmap
  for better display performance, but may cost more memory.
  */
@@ -92,7 +98,7 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 
 #pragma mark - Initializer
 ///=============================================================================
-/// @name Initializer
+/// @name Initializer 各种初始化方法
 ///=============================================================================
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 + (instancetype)new UNAVAILABLE_ATTRIBUTE;
@@ -123,6 +129,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  Sets the image with the specified key in the cache (both memory and disk).
  This method returns immediately and executes the store operation in background.
  
+ 使用key缓存这个图片（内存和磁盘），这个方法会直接返回，实际储存操作在一个后台队列
+ 
  @param image The image to be stored in the cache. If nil, this method has no effect.
  @param key   The key with which to associate the image. If nil, this method has no effect.
  */
@@ -131,6 +139,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 /**
  Sets the image with the specified key in the cache.
  This method returns immediately and executes the store operation in background.
+ 
+ 使用key缓存这个图片（可以选择缓存类型和图片数据缓存方式），这个方法会直接返回，实际储存操作在一个后台队列
  
  @discussion If the `type` contain `YYImageCacheTypeMemory`, then the `image` will 
  be stored in the memory cache; `imageData` will be used instead if `image` is nil.
@@ -151,6 +161,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  Removes the image of the specified key in the cache (both memory and disk).
  This method returns immediately and executes the remove operation in background.
  
+ 根据key移除缓存，这个方法马上返回，实际移除操作在后台队列
+ 
  @param key The key identifying the image to be removed. If nil, this method has no effect.
  */
 - (void)removeImageForKey:(NSString *)key;
@@ -158,6 +170,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 /**
  Removes the image of the specified key in the cache.
  This method returns immediately and executes the remove operation in background.
+ 
+ 根据key移除缓存指定的缓存，这个方法马上返回，实际移除操作在后台队列
  
  @param key  The key identifying the image to be removed. If nil, this method has no effect.
  @param type The cache type to remove image.
@@ -169,6 +183,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  If the image is not in memory, this method may blocks the calling thread until 
  file read finished.
  
+ 某个key是否有缓存
+ 
  @param key A string identifying the image. If nil, just return NO.
  @return Whether the image is in cache.
  */
@@ -178,6 +194,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  Returns a Boolean value that indicates whether a given key is in cache.
  If the image is not in memory and the `type` contains `YYImageCacheTypeDisk`,
  this method may blocks the calling thread until file read finished.
+ 
+ 某个key是否有指定类型的缓存
  
  @param key  A string identifying the image. If nil, just return NO.
  @param type The cache type.
@@ -190,6 +208,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  If the image is not in memory, this method may blocks the calling thread until
  file read finished.
  
+ 根据key获取缓存的图片，如果内存中没有缓存，在从磁盘读取缓存的时候会阻塞线程
+ 
  @param key A string identifying the image. If nil, just return nil.
  @return The image associated with key, or nil if no image is associated with key.
  */
@@ -200,6 +220,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  If the image is not in memory and the `type` contains `YYImageCacheTypeDisk`,
  this method may blocks the calling thread until file read finished.
  
+ 根据key从指定类型的缓存中获取图片（会阻塞线程）
+ 
  @param key A string identifying the image. If nil, just return nil.
  @return The image associated with key, or nil if no image is associated with key.
  */
@@ -207,6 +229,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 
 /**
  Asynchronously get the image associated with a given key.
+ 
+ 根据key获取指定类型的缓存（不会阻塞线程）
  
  @param key   A string identifying the image. If nil, just return nil.
  @param type  The cache type.
@@ -220,6 +244,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
  Returns the image data associated with a given key.
  This method may blocks the calling thread until file read finished.
  
+ 根据key获取缓存的图片data
+ 
  @param key A string identifying the image. If nil, just return nil.
  @return The image data associated with key, or nil if no image is associated with key.
  */
@@ -227,6 +253,8 @@ typedef NS_OPTIONS(NSUInteger, YYImageCacheType) {
 
 /**
  Asynchronously get the image data associated with a given key.
+ 
+ 根据key，异步的获取缓存的图片data
  
  @param key   A string identifying the image. If nil, just return nil.
  @param block A completion block which will be called on main thread.

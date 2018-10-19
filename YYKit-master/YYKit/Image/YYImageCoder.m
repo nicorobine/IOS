@@ -22,6 +22,7 @@
 #import "YYImage.h"
 #import "YYKitMacro.h"
 
+// 判断是否倒入了webP库
 #ifndef YYIMAGE_WEBP_ENABLED
 #if __has_include(<webp/decode.h>) && __has_include(<webp/encode.h>) && \
 __has_include(<webp/demux.h>)  && __has_include(<webp/mux.h>)
@@ -853,7 +854,7 @@ static BOOL YYCGImageDecodeToBitmapBufferWith32BitFormat(CGImageRef srcImage, vI
     // 位图信息
     destFormat.bitmapInfo = bitmapInfo;
     dest->data = NULL;
-    // 解压成位图
+    // 解压成位图buffer
     if (YYCGImageDecodeToBitmapBufferWithAnyFormat(srcImage, dest, &destFormat)) return YES;
     
     // CGBitmapContext 只能使用预乘的alpha信息

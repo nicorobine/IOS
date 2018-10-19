@@ -27,6 +27,7 @@
     return [self initWithPath:path];
 }
 
+// 根据路径初始化磁盘缓存，并初始化内存缓存
 - (instancetype)initWithPath:(NSString *)path {
     if (path.length == 0) return nil;
     YYDiskCache *diskCache = [[YYDiskCache alloc] initWithPath:path];
@@ -42,6 +43,7 @@
     return self;
 }
 
+// 类的方法便捷创建YYCache对象
 + (instancetype)cacheWithName:(NSString *)name {
 	return [[self alloc] initWithName:name];
 }

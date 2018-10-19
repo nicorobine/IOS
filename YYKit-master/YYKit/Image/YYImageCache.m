@@ -39,13 +39,16 @@ static inline dispatch_queue_t YYImageCacheDecodeQueue() {
 
 
 @interface YYImageCache ()
+// 图片占的内存
 - (NSUInteger)imageCost:(UIImage *)image;
+// 根据data获取图片
 - (UIImage *)imageFromData:(NSData *)data;
 @end
 
 
 @implementation YYImageCache
 
+// 获取高度和每行的字节，相乘就是内存大小
 - (NSUInteger)imageCost:(UIImage *)image {
     CGImageRef cgImage = image.CGImage;
     if (!cgImage) return 1;
@@ -57,6 +60,7 @@ static inline dispatch_queue_t YYImageCacheDecodeQueue() {
 }
 
 - (UIImage *)imageFromData:(NSData *)data {
+    // 根据data获取缓存的scale如果没有sacle则使用屏幕scale
     NSData *scaleData = [YYDiskCache getExtendedDataFromObject:data];
     CGFloat scale = 0;
     if (scaleData) {
@@ -64,6 +68,7 @@ static inline dispatch_queue_t YYImageCacheDecodeQueue() {
     }
     if (scale <= 0) scale = [UIScreen mainScreen].scale;
     UIImage *image;
+    // 如果支持动态图
     if (_allowAnimatedImage) {
         image = [[YYImage alloc] initWithData:data scale:scale];
         if (_decodeForDisplay) image = [image imageByDecoded];

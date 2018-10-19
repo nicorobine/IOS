@@ -27,21 +27,25 @@
 
 YY_EXTERN_C_BEGIN
 
+// 获取一个加紧的值 返回值为_x_、_low_或_high
 #ifndef YY_CLAMP // return the clamped value
 #define YY_CLAMP(_x_, _low_, _high_)  (((_x_) > (_high_)) ? (_high_) : (((_x_) < (_low_)) ? (_low_) : (_x_)))
 #endif
 
+// 交换_a_和_b_的值
 #ifndef YY_SWAP // swap two value
 #define YY_SWAP(_a_, _b_)  do { __typeof__(_a_) _tmp_ = (_a_); (_a_) = (_b_); (_b_) = _tmp_; } while (0)
 #endif
 
-
+// 判断为空的断言
 #define YYAssertNil(condition, description, ...) NSAssert(!(condition), (description), ##__VA_ARGS__)
 #define YYCAssertNil(condition, description, ...) NSCAssert(!(condition), (description), ##__VA_ARGS__)
 
+// 判断不为空的断言
 #define YYAssertNotNil(condition, description, ...) NSAssert((condition), (description), ##__VA_ARGS__)
 #define YYCAssertNotNil(condition, description, ...) NSCAssert((condition), (description), ##__VA_ARGS__)
 
+// 判断主线程的断言
 #define YYAssertMainThread() NSAssert([NSThread isMainThread], @"This method must be called on the main thread")
 #define YYCAssertMainThread() NSCAssert([NSThread isMainThread], @"This method must be called on the main thread")
 
@@ -50,6 +54,11 @@ YY_EXTERN_C_BEGIN
  Add this macro before each category implementation, so we don't have to use
  -all_load or -force_load to load object files from static libraries that only
  contain categories and no classes.
+ 在ios开发过程中，有时候会用到第三方的静态库(.a文件)，OC没有为每个函数（或者方法）定义链接符号，它只为每个类创建链接符号。这样当在一个静态库中使用类别来扩展已有类的时候，链接器不知道如何把类原有的方法和类别中的方法整合起来，就会导致你调用类别中的方法时，会出现selector not recognized的错误，从而导致app闪退。使用这段宏定义他可以虚拟新建一个与名字category 相同.h.m 让编译器 编译通过。即可解决上面的问题。
+ 
+ 作者：rogertan30
+ 链接：https://www.jianshu.com/p/2bd75aba7119
+
  More info: http://developer.apple.com/library/mac/#qa/qa2006/qa1490.html .
  *******************************************************************************
  Example:
@@ -65,6 +74,8 @@ YY_EXTERN_C_BEGIN
 /**
  Synthsize a dynamic object property in @implementation scope.
  It allows us to add custom properties to existing classes in categories.
+ 
+ 给对象动态关联的属性的宏
  
  @param association  ASSIGN / RETAIN / COPY / RETAIN_NONATOMIC / COPY_NONATOMIC
  @warning #import <objc/runtime.h>
@@ -95,6 +106,8 @@ YY_EXTERN_C_BEGIN
 /**
  Synthsize a dynamic c type property in @implementation scope.
  It allows us to add custom properties to existing classes in categories.
+ 
+ 动态关联基本类型的属性
  
  @warning #import <objc/runtime.h>
  *******************************************************************************
@@ -203,6 +216,8 @@ static inline CFTypeRef YYCFAutorelease(CFTypeRef CF_RELEASES_ARGUMENT arg) {
  @param block    code to benchmark
  @param complete code time cost (millisecond)
  
+ 计算block内的代码执行时间，单位是ms
+ 
  Usage:
     YYBenchmark(^{
         // code
@@ -252,6 +267,7 @@ static inline NSDate *_YYCompileTime(const char *data, const char *time) {
 
 /**
  Returns a dispatch_time delay from now.
+ 延迟的相对时间
  */
 static inline dispatch_time_t dispatch_time_delay(NSTimeInterval second) {
     return dispatch_time(DISPATCH_TIME_NOW, (int64_t)(second * NSEC_PER_SEC));
@@ -259,6 +275,7 @@ static inline dispatch_time_t dispatch_time_delay(NSTimeInterval second) {
 
 /**
  Returns a dispatch_wall_time delay from now.
+ 延迟的绝对时间
  */
 static inline dispatch_time_t dispatch_walltime_delay(NSTimeInterval second) {
     return dispatch_walltime(DISPATCH_TIME_NOW, (int64_t)(second * NSEC_PER_SEC));
@@ -266,6 +283,7 @@ static inline dispatch_time_t dispatch_walltime_delay(NSTimeInterval second) {
 
 /**
  Returns a dispatch_wall_time from NSDate.
+ 根据NSDate获取绝对时间 1970
  */
 static inline dispatch_time_t dispatch_walltime_date(NSDate *date) {
     NSTimeInterval interval;
@@ -283,6 +301,7 @@ static inline dispatch_time_t dispatch_walltime_date(NSDate *date) {
 
 /**
  Whether in main queue/thread.
+ 是否在主线程
  */
 static inline bool dispatch_is_main_queue() {
     return pthread_main_np() != 0;
@@ -290,8 +309,9 @@ static inline bool dispatch_is_main_queue() {
 
 /**
  Submits a block for asynchronous execution on a main queue and returns immediately.
+ 在主线程中异步执行block，如果当前线程是主线程直接执行
  */
-static inline void dispatch_async_on_main_queue(void (^block)()) {
+static inline void dispatch_async_on_main_queue(void (^block)(void)) {
     if (pthread_main_np()) {
         block();
     } else {
@@ -301,8 +321,9 @@ static inline void dispatch_async_on_main_queue(void (^block)()) {
 
 /**
  Submits a block for execution on a main queue and waits until the block completes.
+ 在主线程中同步执行block，如果当前线程是主线程直接执行
  */
-static inline void dispatch_sync_on_main_queue(void (^block)()) {
+static inline void dispatch_sync_on_main_queue(void (^block)(void)) {
     if (pthread_main_np()) {
         block();
     } else {
@@ -312,6 +333,7 @@ static inline void dispatch_sync_on_main_queue(void (^block)()) {
 
 /**
  Initialize a pthread mutex.
+ 初始化pthread互斥锁，也可以选择创建递归的互斥锁
  */
 static inline void pthread_mutex_init_recursive(pthread_mutex_t *mutex, bool recursive) {
 #define YYMUTEX_ASSERT_ON_ERROR(x_) do { \

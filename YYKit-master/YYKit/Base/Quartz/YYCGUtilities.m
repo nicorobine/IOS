@@ -190,14 +190,19 @@ NSString *YYUIViewContentModeToCAGravity(UIViewContentMode contentMode) {
     }
 }
 
+// 根据rect、size和mode确定绘制的rect
 CGRect YYCGRectFitWithContentMode(CGRect rect, CGSize size, UIViewContentMode mode) {
+    // 转换成标准rect（宽度和高度为正的）
     rect = CGRectStandardize(rect);
+    // 将size的width和height转换为正的
     size.width = size.width < 0 ? -size.width : size.width;
     size.height = size.height < 0 ? -size.height : size.height;
+    // 获取图形的中点
     CGPoint center = CGPointMake(CGRectGetMidX(rect), CGRectGetMidY(rect));
     switch (mode) {
         case UIViewContentModeScaleAspectFit:
         case UIViewContentModeScaleAspectFill: {
+            // 处理0.01以上的尺寸
             if (rect.size.width < 0.01 || rect.size.height < 0.01 ||
                 size.width < 0.01 || size.height < 0.01) {
                 rect.origin = center;

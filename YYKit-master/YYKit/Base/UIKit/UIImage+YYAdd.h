@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Provide some commen method for `UIImage`.
  Image process is based on CoreGraphic and vImage.
+ 
+ 为UIImage提供了一些常用的方法，图像处理给予CoreGraphics和vImage
  */
 @interface UIImage (YYAdd)
 
@@ -28,6 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
  Create an animated image with GIF data. After created, you can access
  the images via property '.images'. If the data is not animated gif, this
  function is same as [UIImage imageWithData:data scale:scale];
+ 
+ 创建一个GIF格式数据的动态图片，你可以通过.images访问这些图片，如果数据不是gif动态图，这个方法和imagewithData:scale
+ 的作用一样
+ 需要注意的是，它得到了更好的展示体验，但是使用了更大的内存，只适合展示比较小的gif动态图，如果动态emoji，如果想要展示大的gif
+ 使用YYImage
  
  @discussion     It has a better display performance, but costs more memory
                  (width * height * frames Bytes). It only suited to display small 
@@ -45,6 +52,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether the data is animated GIF.
  
+ 判断data是否是动态gif
+ 
  @param data Image data
  
  @return Returns YES only if the data is gif and contains more than one frame,
@@ -55,6 +64,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Whether the file in the specified path is GIF.
  
+ 判断路径的file是否是gif动态图
+ 
  @param path An absolute file path.
  
  @return Returns YES if the file is gif, otherwise returns NO.
@@ -63,6 +74,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create an image from a PDF file data or path.
+ 
+ 根据PDF文件路径创建一个图片
+ 需要注意的是如果是多页的PDF文件只会取第一页的内容，图片的scale会取自屏幕，大小曲子pdf的原始大小
  
  @discussion If the PDF has multiple page, is just return's the first page's
  content. Image's scale is equal to current screen's scale, size is same as 
@@ -77,6 +91,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Create an image from a PDF file data or path.
  
+ 根据PDF文件路径或者数据创建图片（可以指定大小，如果必要图片会被拉伸）
+ 
  @discussion If the PDF has multiple page, is just return's the first page's
  content. Image's scale is equal to current screen's scale.
  
@@ -90,6 +106,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create a square image from apple emoji.
+ 
+ 根据苹果的emoji创建一个正方形的图片
  
  @discussion It creates a square image from apple emoji, image's scale is equal
  to current screen's scale. The original emoji image in `AppleColorEmoji` font 
@@ -106,12 +124,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Create and return a 1x1 point size image with the given color.
  
+ 创建并返回一个1*1点大小的指定颜色的图片
+ 
  @param color  The color.
  */
 + (nullable UIImage *)imageWithColor:(UIColor *)color;
 
 /**
  Create and return a pure color image with the given color and size.
+ 
+ 根据指定的颜色和大小创建一个纯色的图片
  
  @param color  The color.
  @param size   New image's type.
@@ -120,6 +142,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Create and return an image with custom draw code.
+ 
+ 创建并返回一个可以自定义绘图代码的图片
  
  @param size      The image size.
  @param drawBlock The draw block.
@@ -135,6 +159,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Whether this image has alpha channel.
+ 图片是否含有alpha通道
  */
 - (BOOL)hasAlphaChannel;
 
@@ -147,6 +172,11 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Draws the entire image in the specified rectangle, content changed with
  the contentMode.
+ 
+ 根据contentMode将整个图片绘制到指定的矩形
+ 
+ 这个方式在当前图形上下文中，以图像原来的的方向绘制整个图像。在默认坐标系总，图片位于指定矩形远点的右下方。
+ 这个方法会适用应用于当前图形上下文的所有变换
  
  @discussion This method draws the entire image in the current graphics context, 
  respecting the image's orientation setting. In the default coordinate system, 
@@ -166,6 +196,8 @@ NS_ASSUME_NONNULL_BEGIN
  Returns a new image which is scaled from this image.
  The image will be stretched as needed.
  
+ 返回一个警告缩放的新图片，如果必要图片会被拉伸
+ 
  @param size  The new size to be scaled, values should be positive.
  
  @return      The new image with the given size.
@@ -175,6 +207,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns a new image which is scaled from this image.
  The image content will be changed with thencontentMode.
+ 
+ 返回一个根据本图片缩放后的新图片，会根据contentMode更改图片的内容
  
  @param size        The new size to be scaled, values should be positive.
  
@@ -187,6 +221,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns a new image which is cropped from this image.
  
+ 返回此图像裁剪后的新图像
+ 
  @param rect  Image's inner rect.
  
  @return      The new image, or nil if an error occurs.
@@ -195,6 +231,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Returns a new image which is edge inset from this image.
+ 
+ 根据本图像返回一个带边框的新图像
  
  @param insets  Inset (positive) for each of the edges, values can be negative to 'outset'.
  
@@ -207,6 +245,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Rounds a new image with a given corner size.
  
+ 返回一个带圆角的新图像
+ 
  @param radius  The radius of each corner oval. Values larger than half the
                 rectangle's width or height are clamped appropriately to half
                 the width or height.
@@ -215,6 +255,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Rounds a new image with a given corner size.
+ 
+ 返回一个指定边界圆角，边界宽度和颜色的新图像对象
  
  @param radius       The radius of each corner oval. Values larger than half the
                      rectangle's width or height are clamped appropriately to
@@ -232,6 +274,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Rounds a new image with a given corner size.
+ 
+ 返回一个指定边界圆角，边界宽度和颜色，和边界交汇类型的新图像对象
  
  @param radius       The radius of each corner oval. Values larger than half the
                      rectangle's width or height are clamped appropriately to
@@ -258,6 +302,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns a new rotated image (relative to the center).
  
+ 返回一个旋转锅指定弧度的图片
+ 
  @param radians   Rotated radians in counterclockwise.⟲
  
  @param fitSize   YES: new image's size is extend to fit all content.
@@ -268,27 +314,32 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns a new image rotated counterclockwise by a quarter‑turn (90°). ⤺
  The width and height will be exchanged.
+ 返回一个逆时针转动90的图片，宽度和高度也做相应的转换
  */
 - (nullable UIImage *)imageByRotateLeft90;
 
 /**
  Returns a new image rotated clockwise by a quarter‑turn (90°). ⤼
  The width and height will be exchanged.
+ 返回一个顺时针转动90的图片，宽度和高度也做相应的转换
  */
 - (nullable UIImage *)imageByRotateRight90;
 
 /**
  Returns a new image rotated 180° . ↻
+ 返回一个转动180度的图片
  */
 - (nullable UIImage *)imageByRotate180;
 
 /**
  Returns a vertically flipped image. ⥯
+ 返回一个垂直翻转的图像
  */
 - (nullable UIImage *)imageByFlipVertical;
 
 /**
  Returns a horizontally flipped image. ⇋
+ 返回一个垂直翻转的图像
  */
 - (nullable UIImage *)imageByFlipHorizontal;
 
@@ -301,40 +352,50 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Tint the image in alpha channel with the given color.
  
+ 返回渲染指定颜色的图像
+ 
  @param color  The color.
  */
 - (nullable UIImage *)imageByTintColor:(UIColor *)color;
 
 /**
  Returns a grayscaled image.
+ 
+ 返回灰度图片
  */
 - (nullable UIImage *)imageByGrayscale;
 
 /**
  Applies a blur effect to this image. Suitable for blur any content.
+ 返回一个添加模糊效果的图像
  */
 - (nullable UIImage *)imageByBlurSoft;
 
 /**
  Applies a blur effect to this image. Suitable for blur any content except pure white.
  (same as iOS Control Panel)
+ 对此图像应用模糊效果，适用于模糊除纯白色的任何图片
  */
 - (nullable UIImage *)imageByBlurLight;
 
 /**
  Applies a blur effect to this image. Suitable for displaying black text.
  (same as iOS Navigation Bar White)
+ 对此图像应用模糊效果，适合显示黑色文本
  */
 - (nullable UIImage *)imageByBlurExtraLight;
 
 /**
  Applies a blur effect to this image. Suitable for displaying white text.
  (same as iOS Notification Center)
+ 对此图像添加模糊效果，适合显示白色文本
  */
 - (nullable UIImage *)imageByBlurDark;
 
 /**
  Applies a blur and tint color to this image.
+ 
+ 使用指定颜色模糊图像
  
  @param tintColor  The tint color.
  */

@@ -67,13 +67,13 @@ static NSString *const kTrashDirectoryName = @"trash";
 @implementation YYKVStorage {
     dispatch_queue_t _trashQueue;
     
-    NSString *_path;
+    NSString *_path;      // 缓存的根目录
     NSString *_dbPath;    // 数据库路径
-    NSString *_dataPath;
-    NSString *_trashPath;
+    NSString *_dataPath;  // 文件缓存路径
+    NSString *_trashPath; // 删除所有缓存文件的时候先讲缓存目录下的文件移动到这个目录再删除，以实现快速清除缓存
     
     sqlite3 *_db;
-    CFMutableDictionaryRef _dbStmtCache;
+    CFMutableDictionaryRef _dbStmtCache;  // sql的stmt缓存，根据sql缓存，不需要每次都重新创建stmt，提高效率
     NSTimeInterval _dbLastOpenErrorTime;  // 上次打开失败时间
     NSUInteger _dbOpenErrorCount;         // 数据库打开失败次数
 }
@@ -202,7 +202,7 @@ static NSString *const kTrashDirectoryName = @"trash";
     return result == SQLITE_OK;
 }
 
-// 准备stmt，这里创建的stmt不直接销毁，由缓存管理销毁
+// 准备stmt，根据sql缓存
 // key是sql，value是stmt
 - (sqlite3_stmt *)_dbPrepareStmt:(NSString *)sql {
     if (![self _dbCheck] || sql.length == 0 || !_dbStmtCache) return NULL;

@@ -68,6 +68,9 @@ NS_ASSUME_NONNULL_BEGIN
  Create a new instance with the specified name.
  Multiple instances with the same name will make the cache unstable.
  
+ 类方法，根据名字创建磁盘缓存对象，同时会根据路径的最后的组成元素创建内存缓存对象
+ 需要注意的是名字相同的不同缓存对象可能会造成缓存不稳定
+ 
  @param name  The name of the cache. It will create a dictionary with the name in
      the app's caches dictionary for disk cache. Once initialized you should not 
      read and write to this directory.
@@ -80,12 +83,16 @@ NS_ASSUME_NONNULL_BEGIN
  Create a new instance with the specified path.
  Multiple instances with the same name will make the cache unstable.
  
+ 类方法，根据路径创建磁盘缓存对象，同时会根据路径的最后的组成元素创建内存缓存对象
+ 需要注意的是名字相同的不同缓存对象可能会造成缓存不稳定
+ 
  @param path  Full path of a directory in which the cache will write data.
      Once initialized you should not read and write to this directory.
  @result A new cache object, or nil if an error occurs.
  */
 + (nullable instancetype)cacheWithPath:(NSString *)path;
 
+// 不要直接使用init或者new初始化
 - (instancetype)init UNAVAILABLE_ATTRIBUTE;
 + (instancetype)new UNAVAILABLE_ATTRIBUTE;
 
@@ -98,6 +105,8 @@ NS_ASSUME_NONNULL_BEGIN
  Returns a boolean value that indicates whether a given key is in cache.
  This method may blocks the calling thread until file read finished.
  
+ 是否有key的缓存（同步）
+ 
  @param key A string identifying the value. If nil, just return NO.
  @return Whether the key is in cache.
  */
@@ -108,6 +117,8 @@ NS_ASSUME_NONNULL_BEGIN
  This method returns immediately and invoke the passed block in background queue
  when the operation finished.
  
+ 是否有key的缓存（异步）
+ 
  @param key   A string identifying the value. If nil, just return NO.
  @param block A block which will be invoked in background queue when finished.
  */
@@ -116,6 +127,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns the value associated with a given key.
  This method may blocks the calling thread until file read finished.
+ 
+ 根据key获取缓存对象（同步）
  
  @param key A string identifying the value. If nil, just return nil.
  @return The value associated with key, or nil if no value is associated with key.
@@ -127,6 +140,8 @@ NS_ASSUME_NONNULL_BEGIN
  This method returns immediately and invoke the passed block in background queue
  when the operation finished.
  
+ 根据key获取缓存对象（异步）
+ 
  @param key A string identifying the value. If nil, just return nil.
  @param block A block which will be invoked in background queue when finished.
  */
@@ -135,6 +150,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Sets the value of the specified key in the cache.
  This method may blocks the calling thread until file write finished.
+ 
+ 根据key缓存对象（同步）
  
  @param object The object to be stored in the cache. If nil, it calls `removeObjectForKey:`.
  @param key    The key with which to associate the value. If nil, this method has no effect.
@@ -146,6 +163,8 @@ NS_ASSUME_NONNULL_BEGIN
  This method returns immediately and invoke the passed block in background queue
  when the operation finished.
  
+ 根据key缓存对象（异步）
+ 
  @param object The object to be stored in the cache. If nil, it calls `removeObjectForKey:`.
  @param block  A block which will be invoked in background queue when finished.
  */
@@ -154,6 +173,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Removes the value of the specified key in the cache.
  This method may blocks the calling thread until file delete finished.
+ 
+ 根据key移除缓存对象（同步）
  
  @param key The key identifying the value to be removed. If nil, this method has no effect.
  */
@@ -164,6 +185,8 @@ NS_ASSUME_NONNULL_BEGIN
  This method returns immediately and invoke the passed block in background queue
  when the operation finished.
  
+ 根据key移除缓存对象（异步）
+ 
  @param key The key identifying the value to be removed. If nil, this method has no effect.
  @param block  A block which will be invoked in background queue when finished.
  */
@@ -172,6 +195,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Empties the cache.
  This method may blocks the calling thread until file delete finished.
+ 清除所有缓存（同步）
  */
 - (void)removeAllObjects;
 
@@ -180,6 +204,8 @@ NS_ASSUME_NONNULL_BEGIN
  This method returns immediately and invoke the passed block in background queue
  when the operation finished.
  
+ 清除所有缓存（异步），速度比较快
+ 
  @param block  A block which will be invoked in background queue when finished.
  */
 - (void)removeAllObjectsWithBlock:(void(^)(void))block;
@@ -187,6 +213,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Empties the cache with block.
  This method returns immediately and executes the clear operation with block in background.
+ 
+ 清除所有缓存（异步），但是比上面的方法速度慢，可以看到移除的过程
  
  @warning You should not send message to this instance in these blocks.
  @param progress This block will be invoked during removing, pass nil to ignore.

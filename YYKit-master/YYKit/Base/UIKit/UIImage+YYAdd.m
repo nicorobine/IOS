@@ -22,6 +22,7 @@
 
 YYSYNTH_DUMMY_CLASS(UIImage_YYAdd)
 
+// 根据图像source和index获取gif图像帧延迟时间
 static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef source, size_t index) {
     NSTimeInterval delay = 0;
     CFDictionaryRef dic = CGImageSourceCopyPropertiesAtIndex(source, index, NULL);
@@ -47,19 +48,27 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
 @implementation UIImage (YYAdd)
 
 + (UIImage *)imageWithSmallGIFData:(NSData *)data scale:(CGFloat)scale {
+    // 将data转换为CGImageSourceRef对象
     CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFTypeRef)(data), NULL);
     if (!source) return nil;
     
+    // 获取图像的帧数
     size_t count = CGImageSourceGetCount(source);
+    // 如果只有1帧（静态图）则使用imageWithData:scale:解码
     if (count <= 1) {
         CFRelease(source);
         return [self.class imageWithData:data scale:scale];
     }
     
+    // 定义帧数组
     NSUInteger frames[count];
+    // 一帧的持续时间（每秒50帧）
     double oneFrameTime = 1 / 50.0; // 50 fps
+    // 总时间
     NSTimeInterval totalTime = 0;
+    // 总帧数
     NSUInteger totalFrame = 0;
+    // 记录最小的持续帧数（其实记录的是所有持续时间的最大公约数）
     NSUInteger gcdFrame = 0;
     for (size_t i = 0; i < count; i++) {
         NSTimeInterval delay = _yy_CGImageSourceGetGIFFrameDelayAtIndex(source, i);
@@ -82,13 +91,16 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
             }
         }
     }
+    // 存放图片的数组
     NSMutableArray *array = [NSMutableArray new];
     for (size_t i = 0; i < count; i++) {
+        // 根据data获取imageRef
         CGImageRef imageRef = CGImageSourceCreateImageAtIndex(source, i, NULL);
         if (!imageRef) {
             CFRelease(source);
             return nil;
         }
+        // 获取图片尺寸
         size_t width = CGImageGetWidth(imageRef);
         size_t height = CGImageGetHeight(imageRef);
         if (width == 0 || height == 0) {
@@ -97,6 +109,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
             return nil;
         }
         
+        // 获取alpha信息
         CGImageAlphaInfo alphaInfo = CGImageGetAlphaInfo(imageRef) & kCGBitmapAlphaInfoMask;
         BOOL hasAlpha = NO;
         if (alphaInfo == kCGImageAlphaPremultipliedLast ||
@@ -105,6 +118,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
             alphaInfo == kCGImageAlphaFirst) {
             hasAlpha = YES;
         }
+        // 设置bitmapInfo
         // BGRA8888 (premultiplied) or BGRX8888
         // same as UIGraphicsBeginImageContext() and -[UIView drawRect:]
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host;
@@ -117,14 +131,18 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
             CFRelease(imageRef);
             return nil;
         }
+        // 绘制到上下文（相当于将图片解压了）
         CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef); // decode
+        // 从上下文中获取图片
         CGImageRef decoded = CGBitmapContextCreateImage(context);
         CFRelease(context);
+        // 获取图片失败的话释放资源
         if (!decoded) {
             CFRelease(source);
             CFRelease(imageRef);
             return nil;
         }
+        // 获取UIImage对象
         UIImage *image = [UIImage imageWithCGImage:decoded scale:scale orientation:UIImageOrientationUp];
         CGImageRelease(imageRef);
         CGImageRelease(decoded);
@@ -132,22 +150,29 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
             CFRelease(source);
             return nil;
         }
+        // 因为UIImage值支持等时的间隔，所以根据最大公约数将同一张图片放到images中，达到控制GIF每帧时常的效果（近似值）
         for (size_t j = 0, max = frames[i] / gcdFrame; j < max; j++) {
             [array addObject:image];
         }
     }
     CFRelease(source);
+    // 调用UIImage的类的方法播放动态度
     UIImage *image = [self.class animatedImageWithImages:array duration:totalTime];
     return image;
 }
 
+// 判断是否是Gif类型的图片
 + (BOOL)isAnimatedGIFData:(NSData *)data {
     if (data.length < 16) return NO;
+    // 获取data前32位
     UInt32 magic = *(UInt32 *)data.bytes;
     // http://www.w3.org/Graphics/GIF/spec-gif89a.txt
+    // 进行位运算判断是否是GIF格式的图片
     if ((magic & 0xFFFFFF) != '\0FIG') return NO;
+    // 判断是否能够转换成CGImageSourceRef对象
     CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFTypeRef)data, NULL);
     if (!source) return NO;
+    // 判断是否多于一帧
     size_t count = CGImageSourceGetCount(source);
     CFRelease(source);
     return count > 1;
@@ -155,27 +180,35 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
 
 + (BOOL)isAnimatedGIFFile:(NSString *)path {
     if (path.length == 0) return NO;
+    // 获取c路径
     const char *cpath = path.UTF8String;
+    // 打开路径的文件
     FILE *fd = fopen(cpath, "rb");
     if (!fd) return NO;
     
     BOOL isGIF = NO;
     UInt32 magic = 0;
+    // 读取文件的前32位用来判断是不是gif图片
     if (fread(&magic, sizeof(UInt32), 1, fd) == 1) {
         if ((magic & 0xFFFFFF) == '\0FIG') isGIF = YES;
     }
+    // 关闭文件
     fclose(fd);
     return isGIF;
 }
 
+// 将PDF转换为UIImage对象（第一页）
 + (UIImage *)imageWithPDF:(id)dataOrPath {
     return [self _yy_imageWithPDF:dataOrPath resize:NO size:CGSizeZero];
 }
 
+// 将PDF转换为指定大小的UIImage对象（第一页）
 + (UIImage *)imageWithPDF:(id)dataOrPath size:(CGSize)size {
     return [self _yy_imageWithPDF:dataOrPath resize:YES size:size];
 }
 
+// 根据苹果emoji表情获取指定的图片
+// 这里使用coreText获取的图片
 + (UIImage *)imageWithEmoji:(NSString *)emoji size:(CGFloat)size {
     if (emoji.length == 0) return nil;
     if (size < 1) return nil;
@@ -205,6 +238,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
 }
 
 + (UIImage *)_yy_imageWithPDF:(id)dataOrPath resize:(BOOL)resize size:(CGSize)size {
+    // 根据data或者路径创建CGPDFDocumentRef对象
     CGPDFDocumentRef pdf = NULL;
     if ([dataOrPath isKindOfClass:[NSData class]]) {
         CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)dataOrPath);
@@ -215,16 +249,21 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     }
     if (!pdf) return nil;
     
+    // 获取PDF的第一页
     CGPDFPageRef page = CGPDFDocumentGetPage(pdf, 1);
     if (!page) {
         CGPDFDocumentRelease(pdf);
         return nil;
     }
     
+    // 根据是否需要重设大小，获取pdf的大小
     CGRect pdfRect = CGPDFPageGetBoxRect(page, kCGPDFCropBox);
     CGSize pdfSize = resize ? size : pdfRect.size;
+    // 使用当前设备的scale
     CGFloat scale = [UIScreen mainScreen].scale;
+    // 当前设备的颜色空间
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    // 创建图形上下文
     CGContextRef ctx = CGBitmapContextCreate(NULL, pdfSize.width * scale, pdfSize.height * scale, 8, 0, colorSpace, kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedFirst);
     if (!ctx) {
         CGColorSpaceRelease(colorSpace);
@@ -232,11 +271,13 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
         return nil;
     }
     
+    // 上下文进行放射转换（缩放使用）,并将page画到当前上下文
     CGContextScaleCTM(ctx, scale, scale);
     CGContextTranslateCTM(ctx, -pdfRect.origin.x, -pdfRect.origin.y);
     CGContextDrawPDFPage(ctx, page);
     CGPDFDocumentRelease(pdf);
     
+    // 从当前上下文中获取图片
     CGImageRef image = CGBitmapContextCreateImage(ctx);
     UIImage *pdfImage = [[UIImage alloc] initWithCGImage:image scale:scale orientation:UIImageOrientationUp];
     CGImageRelease(image);
@@ -250,6 +291,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return [self imageWithColor:color size:CGSizeMake(1, 1)];
 }
 
+// 返回指定颜色的图片
 + (UIImage *)imageWithColor:(UIColor *)color size:(CGSize)size {
     if (!color || size.width <= 0 || size.height <= 0) return nil;
     CGRect rect = CGRectMake(0.0f, 0.0f, size.width, size.height);
@@ -262,6 +304,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 返回以恶搞自己绘制的指定大小的图片
 + (UIImage *)imageWithSize:(CGSize)size drawBlock:(void (^)(CGContextRef context))drawBlock {
     if (!drawBlock) return nil;
     UIGraphicsBeginImageContextWithOptions(size, NO, 0);
@@ -273,6 +316,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 是否拥有alpha通道
 - (BOOL)hasAlphaChannel {
     if (self.CGImage == NULL) return NO;
     CGImageAlphaInfo alpha = CGImageGetAlphaInfo(self.CGImage) & kCGBitmapAlphaInfoMask;
@@ -283,8 +327,11 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
 }
 
 - (void)drawInRect:(CGRect)rect withContentMode:(UIViewContentMode)contentMode clipsToBounds:(BOOL)clips{
+    // 计算画布的rect
     CGRect drawRect = YYCGRectFitWithContentMode(rect, self.size, contentMode);
     if (drawRect.size.width == 0 || drawRect.size.height == 0) return;
+    // 如果需要裁剪边界，先保存当前上下文状态，添加绘图的rect，再恢复上下文状态
+    // 否则直接使用drawInRect:绘制
     if (clips) {
         CGContextRef context = UIGraphicsGetCurrentContext();
         if (context) {
@@ -299,6 +346,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     }
 }
 
+// 绘制成指定大小的图片
 - (UIImage *)imageByResizeToSize:(CGSize)size {
     if (size.width <= 0 || size.height <= 0) return nil;
     UIGraphicsBeginImageContextWithOptions(size, NO, self.scale);
@@ -308,6 +356,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 按照指定模式绘制成指定大小的图片
 - (UIImage *)imageByResizeToSize:(CGSize)size contentMode:(UIViewContentMode)contentMode {
     if (size.width <= 0 || size.height <= 0) return nil;
     UIGraphicsBeginImageContextWithOptions(size, NO, self.scale);
@@ -317,6 +366,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 剪成指定指定rect的部分图像
 - (UIImage *)imageByCropToRect:(CGRect)rect {
     rect.origin.x *= self.scale;
     rect.origin.y *= self.scale;
@@ -329,8 +379,10 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 为图片添加指定颜色和大小的边框
 - (UIImage *)imageByInsetEdge:(UIEdgeInsets)insets withColor:(UIColor *)color {
     CGSize size = self.size;
+    // 更改图片的size（减去边框）
     size.width -= insets.left + insets.right;
     size.height -= insets.top + insets.bottom;
     if (size.width <= 0 || size.height <= 0) return nil;
@@ -352,10 +404,12 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 获取指定圆角的图片
 - (UIImage *)imageByRoundCornerRadius:(CGFloat)radius {
     return [self imageByRoundCornerRadius:radius borderWidth:0 borderColor:nil];
 }
 
+// 获取指定圆角、自定边界颜色和宽度的图片
 - (UIImage *)imageByRoundCornerRadius:(CGFloat)radius
                           borderWidth:(CGFloat)borderWidth
                           borderColor:(UIColor *)borderColor {
@@ -366,6 +420,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
                            borderLineJoin:kCGLineJoinMiter];
 }
 
+// 获取指定圆角，边界颜色和宽度以及边界交界类型的图片
 - (UIImage *)imageByRoundCornerRadius:(CGFloat)radius
                               corners:(UIRectCorner)corners
                           borderWidth:(CGFloat)borderWidth
@@ -416,6 +471,7 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return image;
 }
 
+// 将图片旋转到指定角度
 - (UIImage *)imageByRotate:(CGFloat)radians fitSize:(BOOL)fitSize {
     size_t width = (size_t)CGImageGetWidth(self.CGImage);
     size_t height = (size_t)CGImageGetHeight(self.CGImage);
@@ -499,9 +555,11 @@ static NSTimeInterval _yy_CGImageSourceGetGIFFrameDelayAtIndex(CGImageSourceRef 
     return [self _yy_flipHorizontal:YES vertical:NO];
 }
 
+// 获取渲染指定颜色后的图片
 - (UIImage *)imageByTintColor:(UIColor *)color {
     UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
     CGRect rect = CGRectMake(0, 0, self.size.width, self.size.height);
+    // 先填充颜色，然后混合图片
     [color set];
     UIRectFill(rect);
     [self drawAtPoint:CGPointMake(0, 0) blendMode:kCGBlendModeDestinationIn alpha:1];
@@ -709,6 +767,7 @@ static void _yy_cleanupBuffer(void *userData, void *buf_data) {
 }
 
 // Helper function to add tint and mask.
+// 将给定的effectImge添加遮罩图片、渲染颜色和渲染混合类型进行
 - (UIImage *)_yy_mergeImageRef:(CGImageRef)effectCGImage
                      tintColor:(UIColor *)tintColor
                  tintBlendMode:(CGBlendMode)tintBlendMode
