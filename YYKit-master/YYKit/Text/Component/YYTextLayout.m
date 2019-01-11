@@ -21,17 +21,20 @@
 
 const CGSize YYTextContainerMaxSize = (CGSize){0x100000, 0x100000};
 
+// 每行的边缘结构体
 typedef struct {
     CGFloat head;
     CGFloat foot;
 } YYRowEdge;
 
+// 将size裁减到最大size以内
 static inline CGSize YYTextClipCGSize(CGSize size) {
     if (size.width > YYTextContainerMaxSize.width) size.width = YYTextContainerMaxSize.width;
     if (size.height > YYTextContainerMaxSize.height) size.height = YYTextContainerMaxSize.height;
     return size;
 }
 
+// 旋转到垂直的内边距转换
 static inline UIEdgeInsets UIEdgeInsetRotateVertical(UIEdgeInsets insets) {
     UIEdgeInsets one;
     one.top = insets.left;
@@ -44,6 +47,8 @@ static inline UIEdgeInsets UIEdgeInsetRotateVertical(UIEdgeInsets insets) {
 /**
  Sometimes CoreText may convert CGColor to UIColor for `kCTForegroundColorAttributeName`
  attribute in iOS7. This should be a bug of CoreText, and may cause crash. Here's a workaround.
+ iOS7中有时CoreText可能会将iOS中的`kCTForegroundColorAttributeName`属性的CGColor转换为UIColor。
+ 这应该是CoreText的错误，并可能导致崩溃。 这是一个解决方法。
  */
 static CGColorRef YYTextGetCGColor(CGColorRef color) {
     static UIColor *defaultColor;
@@ -60,6 +65,7 @@ static CGColorRef YYTextGetCGColor(CGColorRef color) {
 
 @implementation YYTextLinePositionSimpleModifier
 - (void)modifyLines:(NSArray *)lines fromText:(NSAttributedString *)text inContainer:(YYTextContainer *)container {
+    // 这里根据排版是垂直还是水平计算行的位置（垂直布局设置position.x，水平布局设置position.y）
     if (container.verticalForm) {
         for (NSUInteger i = 0, max = lines.count; i < max; i++) {
             YYTextLine *line = lines[i];
@@ -183,11 +189,13 @@ static CGColorRef YYTextGetCGColor(CGColorRef color) {
     return self;
 }
 
+// 定义getter宏
 #define Getter(...) \
 dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER); \
 __VA_ARGS__; \
 dispatch_semaphore_signal(_lock);
 
+// 定义setter宏
 #define Setter(...) \
 if (_readonly) { \
 @throw [NSException exceptionWithName:NSInternalInconsistencyException \
@@ -198,18 +206,22 @@ dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER); \
 __VA_ARGS__; \
 dispatch_semaphore_signal(_lock);
 
+// 获取size
 - (CGSize)size {
     Getter(CGSize size = _size) return size;
 }
 
+// 设置size
 - (void)setSize:(CGSize)size {
     Setter(if(!_path) _size = YYTextClipCGSize(size));
 }
 
+// 获取内边距
 - (UIEdgeInsets)insets {
     Getter(UIEdgeInsets insets = _insets) return insets;
 }
 
+// 设置内边距
 - (void)setInsets:(UIEdgeInsets)insets {
     Setter(if(!_path){
         if (insets.top < 0) insets.top = 0;
@@ -220,10 +232,12 @@ dispatch_semaphore_signal(_lock);
     });
 }
 
+// 获取贝塞尔曲线
 - (UIBezierPath *)path {
     Getter(UIBezierPath *path = _path) return path;
 }
 
+// 设置贝塞尔曲线，这里注意处理贝塞尔曲线的origin为负的情况
 - (void)setPath:(UIBezierPath *)path {
     Setter(
            _path = path.copy;
@@ -241,66 +255,81 @@ dispatch_semaphore_signal(_lock);
     );
 }
 
+// 获取排斥路径
 - (NSArray *)exclusionPaths {
     Getter(NSArray *paths = _exclusionPaths) return paths;
 }
 
+// 设置排斥路径
 - (void)setExclusionPaths:(NSArray *)exclusionPaths {
     Setter(_exclusionPaths = exclusionPaths.copy);
 }
 
+// 是否是EvenOdd填充方式
 - (BOOL)isPathFillEvenOdd {
     Getter(BOOL is = _pathFillEvenOdd) return is;
 }
 
+// 设置EvenOdd填充方式
 - (void)setPathFillEvenOdd:(BOOL)pathFillEvenOdd {
     Setter(_pathFillEvenOdd = pathFillEvenOdd);
 }
 
+// path宽度
 - (CGFloat)pathLineWidth {
     Getter(CGFloat width = _pathLineWidth) return width;
 }
 
+// 设置path宽度
 - (void)setPathLineWidth:(CGFloat)pathLineWidth {
     Setter(_pathLineWidth = pathLineWidth);
 }
 
+// 是否是垂直布局
 - (BOOL)isVerticalForm {
     Getter(BOOL v = _verticalForm) return v;
 }
 
+// 设置垂直布局
 - (void)setVerticalForm:(BOOL)verticalForm {
     Setter(_verticalForm = verticalForm);
 }
 
+// 获取最大行数
 - (NSUInteger)maximumNumberOfRows {
     Getter(NSUInteger num = _maximumNumberOfRows) return num;
 }
 
+// 设置最大行数
 - (void)setMaximumNumberOfRows:(NSUInteger)maximumNumberOfRows {
     Setter(_maximumNumberOfRows = maximumNumberOfRows);
 }
 
+// 设置端点类型（左右中，或者上下中）
 - (YYTextTruncationType)truncationType {
     Getter(YYTextTruncationType type = _truncationType) return type;
 }
 
+// 设置端点类型
 - (void)setTruncationType:(YYTextTruncationType)truncationType {
     Setter(_truncationType = truncationType);
 }
 
+// 获取端点象征
 - (NSAttributedString *)truncationToken {
     Getter(NSAttributedString *token = _truncationToken) return token;
 }
 
+// 设置端点象征
 - (void)setTruncationToken:(NSAttributedString *)truncationToken {
     Setter(_truncationToken = truncationToken.copy);
 }
 
+// 设置线位置管理对象
 - (void)setLinePositionModifier:(id<YYTextLinePositionModifier>)linePositionModifier {
     Setter(_linePositionModifier = [(NSObject *)linePositionModifier copy]);
 }
-
+// 获取当前线位置管理对象
 - (id<YYTextLinePositionModifier>)linePositionModifier {
     Getter(id<YYTextLinePositionModifier> m = _linePositionModifier) return m;
 }
@@ -358,6 +387,7 @@ dispatch_semaphore_signal(_lock);
     return self;
 }
 
+// 便捷的初始化方法
 + (YYTextLayout *)layoutWithContainerSize:(CGSize)size text:(NSAttributedString *)text {
     YYTextContainer *container = [YYTextContainer containerWithSize:size];
     return [self layoutWithContainer:container text:text];
@@ -399,13 +429,16 @@ dispatch_semaphore_signal(_lock);
     if (!text || !container) return nil;
     if (range.location + range.length > text.length) return nil;
     container->_readonly = YES;
+    // 最大行数
     maximumNumberOfRows = container.maximumNumberOfRows;
     
     // CoreText bug when draw joined emoji since iOS 8.3.
     // See -[NSMutableAttributedString setClearColorToJoinedEmoji] for more information.
+    // iOS8.3 CoreText绘制联合表情的时候有bug
     static BOOL needFixJoinedEmojiBug = NO;
     // It may use larger constraint size when create CTFrame with
     // CTFramesetterCreateFrame in iOS 10.
+    // iOS10 中使用CTFramesetterCreateFrame创建的CTFame时，可能会有更大的约束大小
     static BOOL needFixLayoutSizeBug = NO;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -433,6 +466,7 @@ dispatch_semaphore_signal(_lock);
         CGRect rect = (CGRect) {CGPointZero, container.size };
         if (needFixLayoutSizeBug) {
             constraintSizeIsExtended = YES;
+            // 被扩大之前的rect，并且出去内边距
             constraintRectBeforeExtended = UIEdgeInsetsInsetRect(rect, container.insets);
             constraintRectBeforeExtended = CGRectStandardize(constraintRectBeforeExtended);
             if (container.isVerticalForm) {
@@ -441,17 +475,21 @@ dispatch_semaphore_signal(_lock);
                 rect.size.height = YYTextContainerMaxSize.height;
             }
         }
+        // 获取去除内边距后的cgPathBox
         rect = UIEdgeInsetsInsetRect(rect, container.insets);
         rect = CGRectStandardize(rect);
         cgPathBox = rect;
+        // 先进行一下y坐标翻转，再生成path，应该是坐标系问题
         rect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1, -1));
         cgPath = CGPathCreateWithRect(rect, NULL); // let CGPathIsRect() returns true
     } else if (container.path && CGPathIsRect(container.path.CGPath, &cgPathBox) && container.exclusionPaths.count == 0) {
         CGRect rect = CGRectApplyAffineTransform(cgPathBox, CGAffineTransformMakeScale(1, -1));
         cgPath = CGPathCreateWithRect(rect, NULL); // let CGPathIsRect() returns true
     } else {
+        // 有exlusionPaths记录行可能被分割
         rowMaySeparated = YES;
         CGMutablePathRef path = NULL;
+        // 如果container有path获取path，如果没有path根据size生成矩形path
         if (container.path) {
             path = CGPathCreateMutableCopy(container.path.CGPath);
         } else {
@@ -463,12 +501,15 @@ dispatch_semaphore_signal(_lock);
                 CGPathRelease(rectPath);
             }
         }
+        // 如果有path，连续添加排斥path
         if (path) {
             [layout.container.exclusionPaths enumerateObjectsUsingBlock: ^(UIBezierPath *onePath, NSUInteger idx, BOOL *stop) {
                 CGPathAddPath(path, NULL, onePath.CGPath);
             }];
             
+            // 获取最终的cgPathBox
             cgPathBox = CGPathGetPathBoundingBox(path);
+            // 进行坐标翻转
             CGAffineTransform trans = CGAffineTransformMakeScale(1, -1);
             CGMutablePathRef transPath = CGPathCreateMutableCopyByTransformingPath(path, &trans);
             CGPathRelease(path);
@@ -480,12 +521,15 @@ dispatch_semaphore_signal(_lock);
     
     // frame setter config
     frameAttrs = [NSMutableDictionary dictionary];
+    // 填充模式
     if (container.isPathFillEvenOdd == NO) {
         frameAttrs[(id)kCTFramePathFillRuleAttributeName] = @(kCTFramePathFillWindingNumber);
     }
+    // path宽度
     if (container.pathLineWidth > 0) {
         frameAttrs[(id)kCTFramePathWidthAttributeName] = @(container.pathLineWidth);
     }
+    // 是否是垂直排版
     if (container.isVerticalForm == YES) {
         frameAttrs[(id)kCTFrameProgressionAttributeName] = @(kCTFrameProgressionRightToLeft);
     }
@@ -493,14 +537,18 @@ dispatch_semaphore_signal(_lock);
     // create CoreText objects
     ctSetter = CTFramesetterCreateWithAttributedString((CFTypeRef)text);
     if (!ctSetter) goto fail;
+    // ctSetter根据range、路径和frame的属性生成ctFrame
     ctFrame = CTFramesetterCreateFrame(ctSetter, YYCFRangeFromNSRange(range), cgPath, (CFTypeRef)frameAttrs);
     if (!ctFrame) goto fail;
     lines = [NSMutableArray new];
+    // 从ctFrame获取ctLines
     ctLines = CTFrameGetLines(ctFrame);
     lineCount = CFArrayGetCount(ctLines);
     if (lineCount > 0) {
+        // 为lineOrigins分配内存
         lineOrigins = malloc(lineCount * sizeof(CGPoint));
         if (lineOrigins == NULL) goto fail;
+        // 获取lineOrigins
         CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, lineCount), lineOrigins);
     }
     

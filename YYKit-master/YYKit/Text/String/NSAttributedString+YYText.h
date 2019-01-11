@@ -25,17 +25,25 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Get pre-defined attributes from attributed string.
  All properties defined in UIKit, CoreText and YYText are included.
+ 
+ 从属性字符串中获取预定义的属性，包含所有UIText、CoreText和YYText的属性
  */
 @interface NSAttributedString (YYText)
 
 /**
  Archive the string to data.
+ 
+ 将string归档成data
+ 
  @return Returns nil if an error occurs.
  */
 - (nullable NSData *)archiveToData;
 
 /**
  Unarchive string from data.
+ 
+ 从data中解压成attribuString
+ 
  @param data  The archived attributed string data.
  @return Returns nil if an error occurs.
  */
@@ -50,11 +58,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Returns the attributes at first charactor.
+ 返回第一个字符的属性
  */
 @property (nullable, nonatomic, copy, readonly) NSDictionary<NSString *, id> *attributes;
 
 /**
  Returns the attributes for the character at a given index.
+ 
+ 获取指定索引的属性
  
  @discussion Raises an `NSRangeException` if index lies beyond the end of the 
  receiver's characters.
@@ -68,6 +79,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Returns the value for an attribute with a given name of the character at a given index.
+ 
+ 获取指定索引和属性名的属性值
  
  @discussion Raises an `NSRangeException` if index lies beyond the end of the
  receiver's characters.
@@ -90,6 +103,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The font of the text. (read-only)
  
+ 获取text的字体，默认是Helvetica（Neue）12，这个Font属性的方法获取的是第一个字符的属性
+ 
  @discussion Default is Helvetica (Neue) 12.
  @discussion Get this property returns the first character's attribute.
  @since CoreText:3.2  UIKit:6.0  YYKit:6.0
@@ -99,6 +114,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  A kerning adjustment. (read-only)
+ 
+ 字距调整。默认为标准字间距0，字距属性指示后续字符应从当前字符的字体定义的默认便宜量偏移的点数，
+ 正kern表示更远的偏移，负kern表示更近的便宜
  
  @discussion Default is standard kerning. The kerning attribute indicate how many 
  points the following character should be shifted from its default offset as 
@@ -115,6 +133,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The foreground color. (read-only)
  
+ forground的颜色
+ 
  @discussion Default is Black.
  @discussion Get this property returns the first character's attribute.
  @since CoreText:3.2  UIKit:6.0  YYKit:6.0
@@ -125,6 +145,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The background color. (read-only)
  
+ 背景颜色
+ 
  @discussion Default is nil (or no background).
  @discussion Get this property returns the first character's attribute.
  @since UIKit:6.0
@@ -134,6 +156,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The stroke width. (read-only)
+ 
+ 设置笔画宽度，取值为 NSNumber 对象（整数），负值填充效果，正值中空效果
  
  @discussion Default value is 0.0 (no stroke). This attribute, interpreted as
  a percentage of font point size, controls the text drawing mode: positive 
@@ -148,6 +172,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The stroke color. (read-only)
  
+ 填充部分颜色，不是字体颜色。默认为nil，采用foregroundColor
+ 
  @discussion Default value is nil (same as foreground color).
  @discussion Get this property returns the first character's attribute.
  @since CoreText:3.2  UIKit:6.0
@@ -157,6 +183,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text shadow. (read-only)
+ 
+ 文本阴影，默认为nil（没有阴影）
  
  @discussion Default value is nil (no shadow).
  @discussion Get this property returns the first character's attribute.
@@ -168,6 +196,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The strikethrough style. (read-only)
  
+ 删除线类型，默认为nil（没有删除线）
+ 
  @discussion Default value is NSUnderlineStyleNone (no strikethrough).
  @discussion Get this property returns the first character's attribute.
  @since UIKit:6.0
@@ -177,6 +207,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The strikethrough color. (read-only)
+ 
+ 删除线颜色，默认为foreground颜色
  
  @discussion Default value is nil (same as foreground color).
  @discussion Get this property returns the first character's attribute.
@@ -188,6 +220,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The underline style. (read-only)
  
+ 下划线的样式，默认为nil（没有下划线）
+ 
  @discussion Default value is NSUnderlineStyleNone (no underline).
  @discussion Get this property returns the first character's attribute.
  @since CoreText:3.2  UIKit:6.0
@@ -198,6 +232,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The underline color. (read-only)
  
+ 下划线颜色，默认为foreground颜色
+ 
  @discussion Default value is nil (same as foreground color).
  @discussion Get this property returns the first character's attribute.
  @since CoreText:3.2  UIKit:7.0
@@ -207,6 +243,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Ligature formation control. (read-only)
+ 
+ 连字格式控制。默认值为int值1. ligature属性确定在显示字符串时应使用哪种类型的连字。
+ 值0表示仅应使用对于正确呈现文本必不可少的连字，1表示应使用标准连字，2表示应使用所有可用连字。
+ 哪些连字是标准的取决于脚本和可能的字体。
  
  @discussion Default is int value 1. The ligature attribute determines what kinds 
  of ligatures should be used when displaying the string. A value of 0 indicates 
@@ -223,6 +263,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text effect. (read-only)
  
+ 文字效果，默认为nil
+ 
  @discussion Default is nil (no effect). The only currently supported value
  is NSTextEffectLetterpressStyle.
  @discussion Get this property returns the first character's attribute.
@@ -234,6 +276,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The skew to be applied to glyphs. (read-only)
  
+ 应用于字形的倾斜度（只读）
+ 
  @discussion Default is 0 (no skew).
  @discussion Get this property returns the first character's attribute.
  @since UIKit:7.0
@@ -243,6 +287,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The log of the expansion factor to be applied to glyphs. (read-only)
+ 
+ 设置文本横向拉伸属性，取值为 NSNumber （float）,正值横向拉伸文本，负值横向压缩文本
  
  @discussion Default is 0 (no expansion).
  @discussion Get this property returns the first character's attribute.
@@ -254,6 +300,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The character's offset from the baseline, in points. (read-only)
  
+ 字符相对于baseline的偏移量（以点为单位）
+ 
  @discussion Default is 0.
  @discussion Get this property returns the first character's attribute.
  @since UIKit:7.0
@@ -263,6 +311,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Glyph orientation control. (read-only)
+ 
+ 是否是垂直字形
  
  @discussion Default is NO. A value of NO indicates that horizontal glyph forms 
  are to be used, YES indicates that vertical glyph forms are to be used.
@@ -274,6 +324,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Specifies text language. (read-only)
+ 
+ 指定的文本语言（只读）。
  
  @discussion Value must be a NSString containing a locale identifier. Default is 
  unset. When this attribute is set to a valid identifier, it will be used to select 
@@ -287,6 +339,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Specifies a bidirectional override or embedding. (read-only)
  
+ 指定的双向覆盖或者嵌入
+ 
  @discussion See alse NSWritingDirection and NSWritingDirectionAttributeName.
  @discussion Get this property returns the first character's attribute.
  @since CoreText:6.0  UIKit:7.0  YYKit:6.0
@@ -297,6 +351,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  An NSParagraphStyle object which is used to specify things like
  line alignment, tab rulers, writing direction, etc. (read-only)
+ 
+ 一个NSParagraphStyle对象，用来指定行对齐、制表符、书写方向等内容
  
  @discussion Default is nil ([NSParagraphStyle defaultParagraphStyle]).
  @discussion Get this property returns the first character's attribute.
@@ -313,6 +369,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text alignment (A wrapper for NSParagraphStyle). (read-only)
  
+ 文字对齐方式
+ 
  @discussion Natural text alignment is realized as left or right alignment 
  depending on the line sweep direction of the first script contained in the paragraph.
  @discussion Default is NSTextAlignmentNatural.
@@ -324,6 +382,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The mode that should be used to break lines (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 行的切换方式
  
  @discussion This property contains the line break mode to be used laying out the paragraph's text.
  @discussion Default is NSLineBreakByWordWrapping.
@@ -337,6 +397,8 @@ NS_ASSUME_NONNULL_BEGIN
  The distance in points between the bottom of one line fragment and the top of the next.
  (A wrapper for NSParagraphStyle) (read-only)
  
+ 一行片段底部到下一样片段顶部的间距（行距）
+ 
  @discussion This value is always nonnegative. This value is included in the line 
  fragment heights in the layout manager.
  @discussion Default is 0.
@@ -348,6 +410,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The space after the end of the paragraph (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 段落结束后的空间高度，（段落的间距）
  
  @discussion This property contains the space (measured in points) added at the 
  end of the paragraph to separate it from the following paragraph. This value must
@@ -364,6 +428,8 @@ NS_ASSUME_NONNULL_BEGIN
  The distance between the paragraph's top and the beginning of its text content.
  (A wrapper for NSParagraphStyle). (read-only)
  
+ 段落的顶部与文本内容开头之间的距离
+ 
  @discussion This property contains the space (measured in points) between the 
  paragraph's top and the beginning of its text content.
  @discussion Default is 0.
@@ -375,6 +441,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The indentation of the first line (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 第一行的缩进
  
  @discussion This property contains the distance (in points) from the leading margin 
  of a text container to the beginning of the paragraph's first line. This value 
@@ -389,6 +457,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The indentation of the receiver's lines other than the first. (A wrapper for NSParagraphStyle). (read-only)
  
+ 除了第一行外整体的缩进
+ 
  @discussion This property contains the distance (in points) from the leading margin 
  of a text container to the beginning of lines other than the first. This value is 
  always nonnegative.
@@ -401,6 +471,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The trailing indentation (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 段落尾部的缩进
  
  @discussion If positive, this value is the distance from the leading margin 
  (for example, the left margin in left-to-right text). If 0 or negative, it's the 
@@ -415,6 +487,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The receiver's minimum height (A wrapper for NSParagraphStyle). (read-only)
  
+ 接收者的最小高度。这个属性包含接收者占据的任何行的最小点高度，忽略字体的大小和附件字形的大小
+ 
  @discussion This property contains the minimum height in points that any line in 
  the receiver will occupy, regardless of the font size or size of any attached graphic. 
  This value must be nonnegative.
@@ -427,6 +501,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The receiver's maximum line height (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 接收者最大的行高度
  
  @discussion This property contains the maximum height in points that any line in 
  the receiver will occupy, regardless of the font size or size of any attached graphic. 
@@ -443,6 +519,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The line height multiple (A wrapper for NSParagraphStyle). (read-only)
  
+ 行高度的放大倍数
+ 
  @discussion This property contains the line break mode to be used laying out the paragraph's text.
  @discussion Default is 0 (no multiple).
  @discussion Get this property returns the first character's attribute.
@@ -453,6 +531,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The base writing direction (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 文字书写方向
  
  @discussion If you specify NSWritingDirectionNaturalDirection, the receiver resolves 
  the writing direction to either NSWritingDirectionLeftToRight or NSWritingDirectionRightToLeft, 
@@ -466,6 +546,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The paragraph's threshold for hyphenation. (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 段落的连字门槛（🤔️）
  
  @discussion Valid values lie between 0.0 and 1.0 inclusive. Hyphenation is attempted 
  when the ratio of the text width (as broken without hyphenation) to the width of the 
@@ -481,6 +563,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The document-wide default tab interval (A wrapper for NSParagraphStyle). (read-only)
+ 
+ 默认tab的间隔（🤔️，默认为0）
  
  @discussion This property represents the default tab interval in points. Tabs after the 
  last specified in tabStops are placed at integer multiples of this distance (if positive).
@@ -506,11 +590,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Get YYText attribute as property
 ///=============================================================================
-/// @name Get YYText attribute as property
+/// @name Get YYText attribute as property 获取YYText属性
 ///=============================================================================
 
 /**
  The text shadow. (read-only)
+ 
+ 获取文本阴影
  
  @discussion Default value is nil (no shadow).
  @discussion Get this property returns the first character's attribute.
@@ -522,6 +608,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text inner shadow. (read-only)
  
+ 文本内部阴影
+ 
  @discussion Default value is nil (no shadow).
  @discussion Get this property returns the first character's attribute.
  @since YYKit:6.0
@@ -531,6 +619,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text underline. (read-only)
+ 
+ 文本下划线
  
  @discussion Default value is nil (no underline).
  @discussion Get this property returns the first character's attribute.
@@ -542,6 +632,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text strikethrough. (read-only)
  
+ 文本删除线
+ 
  @discussion Default value is nil (no strikethrough).
  @discussion Get this property returns the first character's attribute.
  @since YYKit:6.0
@@ -551,6 +643,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text border. (read-only)
+ 
+ 文本边界线
  
  @discussion Default value is nil (no border).
  @discussion Get this property returns the first character's attribute.
@@ -562,6 +656,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text background border. (read-only)
  
+ 文本背景边界线
+ 
  @discussion Default value is nil (no background border).
  @discussion Get this property returns the first character's attribute.
  @since YYKit:6.0
@@ -571,6 +667,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The glyph transform. (read-only)
+ 
+ 字形转换
  
  @discussion Default value is CGAffineTransformIdentity (no transform).
  @discussion Get this property returns the first character's attribute.
@@ -590,6 +688,8 @@ NS_ASSUME_NONNULL_BEGIN
  If there's `YYTextBackedStringAttributeName` attribute, the backed string will
  replace the attributed string range.
  
+ 获取自定范围内的原始文本
+ 
  @param range A range in receiver.
  @return The plain text.
  */
@@ -603,6 +703,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Creates and returns an attachment.
+ 
+ 创建attachment的属性字符串
  
  @param content      The attachment (UIImage/UIView/CALayer).
  @param contentMode  The attachment's content mode.
@@ -622,6 +724,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates and returns an attachment.
  
+ 创建attachment的属性字符串
  
  Example: ContentMode:bottom Alignment:Top.
  
@@ -656,6 +759,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates and returns an attahment from a fourquare image as if it was an emoji.
  
+ 根据图片创建emoji表情字符串
+ 
  @param image     A fourquare image.
  @param fontSize  The font size.
  
@@ -672,17 +777,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Returns NSMakeRange(0, self.length).
+ 返回字符串的真个range
  */
 - (NSRange)rangeOfAll;
 
 /**
  If YES, it share the same attribute in entire text range.
+ 整个字符串是否是相同的属性
  */
 - (BOOL)isSharedAttributesInAllRange;
 
 /**
  If YES, it can be drawn with the [drawWithRect:options:context:] method or displayed with UIKit.
  If NO, it should be drawn with CoreText or YYText.
+ 
+ 如果YES使用[drawWithRect:options:context:]绘制或者使用UIKit绘制，如果为NO，使用CoreText或者YYText
+ 如果返回NO，也就是意味着最少有一个属性不支持使用UIKit，如果仍然使用UIKit展示，可能会丢失一些属性或者crash
  
  @discussion If the method returns NO, it means that there's at least one attribute 
  which is not supported by UIKit (such as CTParagraphStyleRef). If display this string
@@ -698,6 +808,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Set pre-defined attributes to attributed string.
  All properties defined in UIKit, CoreText and YYText are included.
+ 为属性字符串设置与定义的属性
  */
 @interface NSMutableAttributedString (YYText)
 
@@ -709,6 +820,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Sets the attributes to the entire text string.
  
+ 为整个text设置属性
+ 
  @discussion The old attributes will be removed.
  
  @param attributes  A dictionary containing the attributes to set, or nil to remove all attributes.
@@ -717,6 +830,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Sets an attribute with the given name and value to the entire text string.
+ 
+ 根据属性名字设置属性，作用与整个字符串
  
  @param name   A string specifying the attribute name.
  @param value  The attribute value associated with name. Pass `nil` or `NSNull` to
@@ -727,6 +842,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Sets an attribute with the given name and value to the characters in the specified range.
  
+ 根据属性名字设置指定范围内的字符属性
+ 
  @param name   A string specifying the attribute name.
  @param value  The attribute value associated with name. Pass `nil` or `NSNull` to
  remove the attribute.
@@ -736,6 +853,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Removes all attributes in the specified range.
+ 
+ 移除指定范围内的所有属性
  
  @param range  The range of characters.
  */
@@ -750,6 +869,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The font of the text.
  
+ 设置字体
+ 
  @discussion Default is Helvetica (Neue) 12.
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -760,6 +881,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  A kerning adjustment.
+ 
+ 字距调节
  
  @discussion Default is standard kerning. The kerning attribute indicate how many 
  points the following character should be shifted from its default offset as 
@@ -777,6 +900,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The foreground color.
  
+ 设置foreground颜色
+ 
  @discussion Default is Black.
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -788,6 +913,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The background color.
  
+ 设置背景颜色
+ 
  @discussion Default is nil (or no background).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -798,6 +925,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The stroke width.
+ 
+ 设置笔画宽度，负值填充效果，正值中空效果
  
  @discussion Default value is 0.0 (no stroke). This attribute, interpreted as
  a percentage of font point size, controls the text drawing mode: positive 
@@ -813,6 +942,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The stroke color.
  
+ 填充部分颜色，不是字体颜色
+ 
  @discussion Default value is nil (same as foreground color).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -823,6 +954,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text shadow.
+ 
+ 设置文本阴影
  
  @discussion Default value is nil (no shadow).
  @discussion Set this property applies to the entire text string.
@@ -835,6 +968,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The strikethrough style.
  
+ 设置删除线样式
+ 
  @discussion Default value is NSUnderlineStyleNone (no strikethrough).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -845,6 +980,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The strikethrough color.
+ 
+ 设置删除线颜色
  
  @discussion Default value is nil (same as foreground color).
  @discussion Set this property applies to the entire text string.
@@ -857,6 +994,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The underline style.
  
+ 设置下划线样式
+ 
  @discussion Default value is NSUnderlineStyleNone (no underline).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -868,6 +1007,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The underline color.
  
+ 设置下划线颜色
+ 
  @discussion Default value is nil (same as foreground color).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -878,6 +1019,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Ligature formation control.
+ 
+ 连字形成控制
  
  @discussion Default is int value 1. The ligature attribute determines what kinds 
  of ligatures should be used when displaying the string. A value of 0 indicates 
@@ -895,6 +1038,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text effect.
  
+ 设置文字效果
+ 
  @discussion Default is nil (no effect). The only currently supported value
  is NSTextEffectLetterpressStyle.
  @discussion Set this property applies to the entire text string.
@@ -905,7 +1050,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTextEffect:(nullable NSString *)textEffect range:(NSRange)range NS_AVAILABLE_IOS(7_0);
 
 /**
- The skew to be applied to glyphs. 
+ The skew to be applied to glyphs.
+ 
+ 设置字形的倾斜度
  
  @discussion Default is 0 (no skew).
  @discussion Set this property applies to the entire text string.
@@ -918,6 +1065,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The log of the expansion factor to be applied to glyphs.
  
+ 设置文本横向拉伸属性
+ 
  @discussion Default is 0 (no expansion).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -927,7 +1076,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setExpansion:(nullable NSNumber *)expansion range:(NSRange)range NS_AVAILABLE_IOS(7_0);
 
 /**
- The character's offset from the baseline, in points. 
+ The character's offset from the baseline, in points.
+ 
+ 设置基线偏移值,正值上偏，负值下偏
  
  @discussion Default is 0.
  @discussion Set this property applies to the entire text string.
@@ -940,6 +1091,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Glyph orientation control.
  
+ 文字排版方向是否是垂直的
+ 
  @discussion Default is NO. A value of NO indicates that horizontal glyph forms 
  are to be used, YES indicates that vertical glyph forms are to be used.
  @discussion Set this property applies to the entire text string.
@@ -951,6 +1104,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Specifies text language.
+ 
+ 设置指定范围的文本语言
  
  @discussion Value must be a NSString containing a locale identifier. Default is 
  unset. When this attribute is set to a valid identifier, it will be used to select 
@@ -965,6 +1120,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Specifies a bidirectional override or embedding.
  
+ 设置文字书写方向
+ 
  @discussion See alse NSWritingDirection and NSWritingDirectionAttributeName.
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -976,6 +1133,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  An NSParagraphStyle object which is used to specify things like
  line alignment, tab rulers, writing direction, etc.
+ 
+ 设置段落样式
  
  @discussion Default is nil ([NSParagraphStyle defaultParagraphStyle]).
  @discussion Set this property applies to the entire text string.
@@ -994,6 +1153,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text alignment (A wrapper for NSParagraphStyle).
  
+ 设置文本对齐方式
+ 
  @discussion Natural text alignment is realized as left or right alignment
  depending on the line sweep direction of the first script contained in the paragraph.
  @discussion Default is NSTextAlignmentNatural.
@@ -1006,6 +1167,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The mode that should be used to break lines (A wrapper for NSParagraphStyle).
+ 
+ 换行模式
  
  @discussion This property contains the line break mode to be used laying out the paragraph's text.
  @discussion Default is NSLineBreakByWordWrapping.
@@ -1020,6 +1183,8 @@ NS_ASSUME_NONNULL_BEGIN
  The distance in points between the bottom of one line fragment and the top of the next.
  (A wrapper for NSParagraphStyle)
  
+ 行距
+ 
  @discussion This value is always nonnegative. This value is included in the line
  fragment heights in the layout manager.
  @discussion Default is 0.
@@ -1032,6 +1197,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The space after the end of the paragraph (A wrapper for NSParagraphStyle).
+ 
+ 段落之后距离
  
  @discussion This property contains the space (measured in points) added at the
  end of the paragraph to separate it from the following paragraph. This value must
@@ -1049,6 +1216,8 @@ NS_ASSUME_NONNULL_BEGIN
  The distance between the paragraph's top and the beginning of its text content.
  (A wrapper for NSParagraphStyle).
  
+ 段落的顶部距离开始文本的距离
+ 
  @discussion This property contains the space (measured in points) between the
  paragraph's top and the beginning of its text content.
  @discussion Default is 0.
@@ -1061,6 +1230,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The indentation of the first line (A wrapper for NSParagraphStyle).
+ 
+ 首行缩进
  
  @discussion This property contains the distance (in points) from the leading margin
  of a text container to the beginning of the paragraph's first line. This value
@@ -1076,6 +1247,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The indentation of the receiver's lines other than the first. (A wrapper for NSParagraphStyle).
  
+ 一般行的缩进
+ 
  @discussion This property contains the distance (in points) from the leading margin
  of a text container to the beginning of lines other than the first. This value is
  always nonnegative.
@@ -1089,6 +1262,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The trailing indentation (A wrapper for NSParagraphStyle).
+ 
+ 段落尾部缩进
  
  @discussion If positive, this value is the distance from the leading margin
  (for example, the left margin in left-to-right text). If 0 or negative, it's the
@@ -1104,6 +1279,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The receiver's minimum height (A wrapper for NSParagraphStyle).
  
+ 最小行高度
+ 
  @discussion This property contains the minimum height in points that any line in
  the receiver will occupy, regardless of the font size or size of any attached graphic.
  This value must be nonnegative.
@@ -1117,6 +1294,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The receiver's maximum line height (A wrapper for NSParagraphStyle).
+ 
+ 最大行高度
  
  @discussion This property contains the maximum height in points that any line in
  the receiver will occupy, regardless of the font size or size of any attached graphic.
@@ -1134,6 +1313,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The line height multiple (A wrapper for NSParagraphStyle).
  
+ 行高度倍数
+ 
  @discussion This property contains the line break mode to be used laying out the paragraph's text.
  @discussion Default is 0 (no multiple).
  @discussion Set this property applies to the entire text string.
@@ -1145,6 +1326,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The base writing direction (A wrapper for NSParagraphStyle).
+ 
+ 文字书写方向
  
  @discussion If you specify NSWritingDirectionNaturalDirection, the receiver resolves
  the writing direction to either NSWritingDirectionLeftToRight or NSWritingDirectionRightToLeft,
@@ -1208,6 +1391,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text shadow.
  
+ 文字阴影
+ 
  @discussion Default value is nil (no shadow).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -1218,6 +1403,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text inner shadow.
+ 
+ 内部阴影
  
  @discussion Default value is nil (no shadow).
  @discussion Set this property applies to the entire text string.
@@ -1230,6 +1417,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text underline.
  
+ 下划线
+ 
  @discussion Default value is nil (no underline).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -1240,6 +1429,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The text strikethrough.
+ 
+ 删除线
  
  @discussion Default value is nil (no strikethrough).
  @discussion Set this property applies to the entire text string.
@@ -1252,6 +1443,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text border.
  
+ 文本边界线
+ 
  @discussion Default value is nil (no border).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -1263,6 +1456,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The text background border.
  
+ 文本背景边界线
+ 
  @discussion Default value is nil (no background border).
  @discussion Set this property applies to the entire text string.
              Get this property returns the first character's attribute.
@@ -1273,6 +1468,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  The glyph transform.
+ 
+ 字形转换
  
  @discussion Default value is CGAffineTransformIdentity (no transform).
  @discussion Set this property applies to the entire text string.
@@ -1313,6 +1510,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Convenience method to set text highlight
+ 
+ 设置文本的高亮（可以交互）状态
  
  @param range           text range
  @param color           text color (pass nil to ignore)
@@ -1363,6 +1562,8 @@ NS_ASSUME_NONNULL_BEGIN
  Inserts into the receiver the characters of a given string at a given location.
  The new string inherit the attributes of the first replaced character from location.
  
+ 消息接收者在指定位置插入给定的字符串。新的字符串继承插入位置被替换的字符的属性
+ 
  @param string  The string to insert into the receiver, must not be nil.
  @param location The location at which string is inserted. The location must not 
     exceed the bounds of the receiver.
@@ -1374,6 +1575,8 @@ NS_ASSUME_NONNULL_BEGIN
  Adds to the end of the receiver the characters of a given string.
  The new string inherit the attributes of the receiver's tail.
  
+ 将给定字符串插入消息接收者的后边。新的字符串继承消息接收者末尾字符的属性
+ 
  @param string  The string to append to the receiver, must not be nil.
  */
 - (void)appendString:(NSString *)string;
@@ -1381,6 +1584,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Set foreground color with [UIColor clearColor] in joined-emoji range.
  Emoji drawing will not be affected by the foreground color.
+ 
+ 在emoji的方位内前景色设置成clearColor，emoji绘制不受前景色的影响
  
  @discussion In iOS 8.3, Apple releases some new diversified emojis. 
  There's some single emoji which can be assembled to a new 'joined-emoji'.
@@ -1397,12 +1602,16 @@ NS_ASSUME_NONNULL_BEGIN
  Removes all discontinuous attributes in a specified range.
  See `allDiscontinuousAttributeKeys`.
  
+ 移除指定范围内所有不连续的属性
+ 
  @param range A text range.
  */
 - (void)removeDiscontinuousAttributesInRange:(NSRange)range;
 
 /**
  Returns all discontinuous attribute keys, such as RunDelegate/Attachment/Ruby.
+ 
+ 返回所有不连续属性的key，例如RunDelegate/Attachment/Ruby
  
  @discussion These attributes can only set to a specified range of text, and
  should not extend to other range when editing text.

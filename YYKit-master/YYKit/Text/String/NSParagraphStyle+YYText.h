@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates a new NSParagraphStyle object from the CoreText Style.
  
+ 转换CTParagraphStyleRef
+ 
  @param CTStyle CoreText Paragraph Style.
  
  @return a new NSParagraphStyle
@@ -29,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Creates and returns a CoreText Paragraph Style. (need call CFRelease() after used)
+ 转换为CTParagraphStyleRef
  */
 - (nullable CTParagraphStyleRef)CTStyle CF_RETURNS_RETAINED;
 

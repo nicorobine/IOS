@@ -33,15 +33,18 @@
     return [NSString stringWithFormat:@"<%@: %p> (%@%@)", self.class, self, @(_offset), _affinity == YYTextAffinityForward ? @"F":@"B"];
 }
 
+// 重写hash方法
 - (NSUInteger)hash {
     return _offset * 2 + (_affinity == YYTextAffinityForward ? 1 : 0);
 }
 
+// 重写isEqual方法
 - (BOOL)isEqual:(YYTextPosition *)object {
     if (!object) return NO;
     return _offset == object.offset && _affinity == object.affinity;
 }
 
+// 比较方法
 - (NSComparisonResult)compare:(YYTextPosition *)otherPosition {
     if (!otherPosition) return NSOrderedAscending;
     if (_offset < otherPosition.offset) return NSOrderedAscending;
@@ -117,10 +120,12 @@
     return [NSString stringWithFormat:@"<%@: %p> (%@, %@)%@", self.class, self, @(_start.offset), @(_end.offset - _start.offset), _end.affinity == YYTextAffinityForward ? @"F":@"B"];
 }
 
+// 根据_start和_end生成hash码
 - (NSUInteger)hash {
     return (sizeof(NSUInteger) == 8 ? OSSwapInt64(_start.hash) : OSSwapInt32(_start.hash)) + _end.hash;
 }
 
+// 重写equal方法
 - (BOOL)isEqual:(YYTextRange *)object {
     if (!object) return NO;
     return [_start isEqual:object.start] && [_end isEqual:object.end];

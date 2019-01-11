@@ -140,6 +140,7 @@
     _border.strokeWidth = CGFloatFromPixel(1);
 }
 
+// 字符串在指定的range，从第一个字符除去空格、换行和制表符到第一个字符的长度
 - (NSUInteger)lenghOfBeginWhiteInString:(NSString *)str withRange:(NSRange)range{
     for (NSUInteger i = 0; i < range.length; i++) {
         unichar c = [str characterAtIndex:i + range.location];
@@ -148,6 +149,7 @@
     return str.length;
 }
 
+// 字符串在指定的range，从最后一个字符除去空格、换行和制表符到第一个字符的长度
 - (NSUInteger)lenghOfEndWhiteInString:(NSString *)str withRange:(NSRange)range{
     for (NSInteger i = range.length - 1; i >= 0; i--) {
         unichar c = [str characterAtIndex:i + range.location];
@@ -156,6 +158,7 @@
     return str.length;
 }
 
+// 字符串在range中，从一个字符到第一个指定字符c的长度
 - (NSUInteger)lenghOfBeginChar:(unichar)c inString:(NSString *)str withRange:(NSRange)range{
     for (NSUInteger i = 0; i < range.length; i++) {
         if ([str characterAtIndex:i + range.location] != c) return i;
@@ -163,6 +166,7 @@
     return str.length;
 }
 
+// 实现解析协议
 - (BOOL)parseText:(NSMutableAttributedString *)text selectedRange:(NSRangePointer)range {
     if (text.length == 0) return NO;
     [text removeAttributesInRange:NSMakeRange(0, text.length)];

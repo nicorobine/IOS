@@ -182,6 +182,8 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     shadow.radius = nsShadow.shadowBlurRadius;
     id color = nsShadow.shadowColor;
     if (color) {
+        // CGColorGetTypeID()方法返回一个编号，每个CoreFoundation框架中的结构都会有一个编号
+        // 这个判断color是不是CGColor
         if (CGColorGetTypeID() == CFGetTypeID((__bridge CFTypeRef)(color))) {
             color = [UIColor colorWithCGColor:(__bridge CGColorRef)(color)];
         }
@@ -435,6 +437,7 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     }
 }
 
+// 这里的属性字典实际存放的是CTFont
 - (void)setFont:(UIFont *)font {
     [self _makeMutableAttributes];
     if (font == (id)[NSNull null] || font == nil) {
@@ -448,6 +451,7 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     }
 }
 
+// 根据不同的key存放不同的color类型
 - (void)setColor:(UIColor *)color {
     [self _makeMutableAttributes];
     if (color == (id)[NSNull null] || color == nil) {
@@ -459,6 +463,7 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     }
 }
 
+// 设置宽度
 - (void)setStrokeWidth:(NSNumber *)width {
     [self _makeMutableAttributes];
     if (width == (id)[NSNull null] || width == nil) {
@@ -468,6 +473,7 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     }
 }
 
+// 设置颜色
 - (void)setStrokeColor:(UIColor *)color {
     [self _makeMutableAttributes];
     if (color == (id)[NSNull null] || color == nil) {
@@ -479,36 +485,44 @@ YYTextAttributeType YYTextAttributeGetType(NSString *name){
     }
 }
 
+// 根据key设置value
 - (void)setTextAttribute:(NSString *)attribute value:(id)value {
     [self _makeMutableAttributes];
     if (value == nil) value = [NSNull null];
     ((NSMutableDictionary *)_attributes)[attribute] = value;
 }
 
+// 设置阴影
 - (void)setShadow:(YYTextShadow *)shadow {
     [self setTextAttribute:YYTextShadowAttributeName value:shadow];
 }
 
+// 设置内部阴影
 - (void)setInnerShadow:(YYTextShadow *)shadow {
     [self setTextAttribute:YYTextInnerShadowAttributeName value:shadow];
 }
 
+// 设置下划线
 - (void)setUnderline:(YYTextDecoration *)underline {
     [self setTextAttribute:YYTextUnderlineAttributeName value:underline];
 }
 
+// 设置删除线
 - (void)setStrikethrough:(YYTextDecoration *)strikethrough {
     [self setTextAttribute:YYTextStrikethroughAttributeName value:strikethrough];
 }
 
+// 设置背景边框
 - (void)setBackgroundBorder:(YYTextBorder *)border {
     [self setTextAttribute:YYTextBackgroundBorderAttributeName value:border];
 }
 
+// 设置边框
 - (void)setBorder:(YYTextBorder *)border {
     [self setTextAttribute:YYTextBorderAttributeName value:border];
 }
 
+// 设置attachment
 - (void)setAttachment:(YYTextAttachment *)attachment {
     [self setTextAttribute:YYTextAttachmentAttributeName value:attachment];
 }

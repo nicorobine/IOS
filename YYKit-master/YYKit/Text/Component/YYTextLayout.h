@@ -42,6 +42,12 @@ extern const CGSize YYTextContainerMaxSize;
  
  All methods in this class is thread-safe.
  
+ YYTextContainer类定义了文本布局的区域，YYTextLayout累使用了一个或者多个YYTextContainer对象进行布局。
+ 一个YYTextContainer定一个一个矩形或者非矩形形状区域，而且可以在文本容器的范围内定义一些排斥路径，从而使文本
+ 环绕在排斥路径区域外面
+ 
+ 所有的方法都是线程安全的
+ 
  Example:
  
      ┌─────────────────────────────┐  <------- container
@@ -59,44 +65,57 @@ extern const CGSize YYTextContainerMaxSize;
 @interface YYTextContainer : NSObject <NSCoding, NSCopying>
 
 /// Creates a container with the specified size. @param size The size.
+/// 根据大小初始化
 + (instancetype)containerWithSize:(CGSize)size;
 
 /// Creates a container with the specified size and insets. @param size The size. @param insets The text insets.
+/// 根据大小和内边距初始化
 + (instancetype)containerWithSize:(CGSize)size insets:(UIEdgeInsets)insets;
 
 /// Creates a container with the specified path. @param path The path.
+/// 根据贝塞尔曲线初始化
 + (instancetype)containerWithPath:(nullable UIBezierPath *)path;
 
 /// The constrained size. (if the size is larger than YYTextContainerMaxSize, it will be clipped)
+/// 大小，如果该大小超过最大的大小会被裁减
 @property CGSize size;
 
 /// The insets for constrained size. The inset value should not be negative. Default is UIEdgeInsetsZero.
+/// 内边距
 @property UIEdgeInsets insets;
 
 /// Custom constrained path. Set this property to ignore `size` and `insets`. Default is nil.
+/// 贝塞尔曲线
 @property (nullable, copy) UIBezierPath *path;
 
 /// An array of `UIBezierPath` for path exclusion. Default is nil.
+/// 排斥路径
 @property (nullable, copy) NSArray<UIBezierPath *> *exclusionPaths;
 
 /// Path line width. Default is 0;
+/// 路径宽度（默认为0）
 @property CGFloat pathLineWidth;
 
 /// YES:(PathFillEvenOdd) Text is filled in the area that would be painted if the path were given to CGContextEOFillPath.
 /// NO: (PathFillWindingNumber) Text is fill in the area that would be painted if the path were given to CGContextFillPath.
 /// Default is YES;
+/// 路径填充奇偶，默认为YES
 @property (getter=isPathFillEvenOdd) BOOL pathFillEvenOdd;
 
 /// Whether the text is vertical form (may used for CJK text layout). Default is NO.
+/// 是否是垂直排版模式
 @property (getter=isVerticalForm) BOOL verticalForm;
 
 /// Maximum number of rows, 0 means no limit. Default is 0.
+/// 最大行数，默认为0，没有限制
 @property NSUInteger maximumNumberOfRows;
 
 /// The line truncation type, default is none.
+/// 行端点类型，默认YYTextTruncationTypeNone
 @property YYTextTruncationType truncationType;
 
 /// The truncation token. If nil, the layout will use "…" instead. Default is nil.
+/// 端点令牌，如果为nil，布局将使用"..."替代。默认为nil
 @property (nullable, copy) NSAttributedString *truncationToken;
 
 /// This modifier is applied to the lines before the layout is completed,
@@ -108,10 +127,12 @@ extern const CGSize YYTextContainerMaxSize;
 /**
  The YYTextLinePositionModifier protocol declares the required method to modify
  the line position in text layout progress. See `YYTextLinePositionSimpleModifier` for example.
+ 这个协议生命了在文本布局过程中修改行位置所必要的方法
  */
 @protocol YYTextLinePositionModifier <NSObject, NSCopying>
 @required
 /**
+ 这个方法会在布局完成之前调用。这个方法应该是线程安全的
  This method will called before layout is completed. The method should be thread-safe.
  @param lines     An array of YYTextLine.
  @param text      The full text.
@@ -136,6 +157,9 @@ extern const CGSize YYTextContainerMaxSize;
  All the property in this class is readonly, and should not be changed.
  The methods in this class is thread-safe (except some of the draw methods).
  
+ YYTextLayout是一个储存文本布局结果的只读类。这个类的所有属性都是只读的，而且不应该被修改。
+ 除了一些绘制方法，这个类的方法都是线程安全的。
+ 
  example: (layout with a circle exclusion path)
  
      ┌──────────────────────────┐  <------ container
@@ -158,6 +182,8 @@ extern const CGSize YYTextContainerMaxSize;
 
 /**
  Generate a layout with the given container size and text.
+ 
+ 根据一个容器的大小和属性文本生成布局类
 
  @param size The text container's size
  @param text The text (if nil, returns nil).
@@ -169,6 +195,8 @@ extern const CGSize YYTextContainerMaxSize;
 /**
  Generate a layout with the given container and text.
  
+ 根据YYTextContainer和属性文本生成布局类
+ 
  @param container The text container (if nil, returns nil).
  @param text      The text (if nil, returns nil).
  @return A new layout, or nil when an error occurs.
@@ -178,6 +206,8 @@ extern const CGSize YYTextContainerMaxSize;
 
 /**
  Generate a layout with the given container and text.
+ 
+ 根据YYTextContainer和属性文本生成指定范围内布局类
  
  @param container The text container (if nil, returns nil).
  @param text      The text (if nil, returns nil).
@@ -192,6 +222,8 @@ extern const CGSize YYTextContainerMaxSize;
 /**
  Generate layouts with the given containers and text.
  
+ 根据多个YYTextContainer和属性文本生成布局类
+ 
  @param containers An array of YYTextContainer object (if nil, returns nil).
  @param text       The text (if nil, returns nil).
  @return An array of YYTextLayout object (the count is same as containers),
@@ -202,6 +234,8 @@ extern const CGSize YYTextContainerMaxSize;
 
 /**
  Generate layouts with the given containers and text.
+ 
+ 根据多个YYTextContainer和属性文本生成指定范围内的布局类
  
  @param containers An array of YYTextContainer object (if nil, returns nil).
  @param text       The text (if nil, returns nil).
@@ -224,12 +258,16 @@ extern const CGSize YYTextContainerMaxSize;
 ///=============================================================================
 
 ///< The text container
+/// 容器类（包含布局的各种边界）
 @property (nonatomic, strong, readonly) YYTextContainer *container;
 ///< The full text
+/// 要展示的属性文本
 @property (nonatomic, strong, readonly) NSAttributedString *text;
 ///< The text range in full text
+/// 布局相对于完整的文本的范围
 @property (nonatomic, readonly) NSRange range;
 ///< CTFrameSetter
+/// CTFramesetter 类型用于生成text frames，CTFramesetter是CTFrame对象的对象工厂。CTFramesetter 获取attributed类型对象和一个形状描述对象，创建line 对象填充形状。输出是一个包含了一个line数组的frame对象，frame 可以直接把自己画在graphic context。
 @property (nonatomic, readonly) CTFramesetterRef frameSetter;
 ///< CTFrame
 @property (nonatomic, readonly) CTFrameRef frame;

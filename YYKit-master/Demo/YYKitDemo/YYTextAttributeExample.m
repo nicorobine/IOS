@@ -165,6 +165,7 @@
         border.lineStyle = YYTextLineStyleSingle;
         one.textBackgroundBorder = border;
         
+        
         YYTextBorder *highlightBorder = border.copy;
         highlightBorder.strokeWidth = 0;
         highlightBorder.strokeColor = one.color;

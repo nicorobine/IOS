@@ -24,6 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  A text line object wrapped `CTLineRef`, see `YYTextLayout` for more.
+ 一个封装了CTLineRef的文本线对象
  */
 @interface YYTextLine : NSObject
 

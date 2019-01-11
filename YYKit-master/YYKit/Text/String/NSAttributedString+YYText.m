@@ -25,6 +25,7 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
 
 @implementation NSAttributedString (YYText)
 
+// 将属性字符串压缩成NSData对象
 - (NSData *)archiveToData {
     NSData *data = nil;
     @try {
@@ -36,6 +37,7 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return data;
 }
 
+// 从NSData中解压缩字符串
 + (instancetype)unarchiveFromData:(NSData *)data {
     NSAttributedString *one = nil;
     @try {
@@ -47,12 +49,14 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return one;
 }
 
+// 获取指定索引的属性
 - (NSDictionary *)attributesAtIndex:(NSUInteger)index {
     if (index > self.length || self.length == 0) return nil;
     if (self.length > 0 && index == self.length) index--;
     return [self attributesAtIndex:index effectiveRange:NULL];
 }
 
+// 根据属性名获取指定的属性
 - (id)attribute:(NSString *)attributeName atIndex:(NSUInteger)index {
     if (!attributeName) return nil;
     if (index > self.length || self.length == 0) return nil;
@@ -60,14 +64,17 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return [self attribute:attributeName atIndex:index effectiveRange:NULL];
 }
 
+// 默认获取第一个字符的属性
 - (NSDictionary *)attributes {
     return [self attributesAtIndex:0];
 }
 
+// 默认获取第一个字符的字体
 - (UIFont *)font {
     return [self fontAtIndex:0];
 }
 
+// 获取指定索引的字体
 - (UIFont *)fontAtIndex:(NSUInteger)index {
     /*
      In iOS7 and later, UIFont is toll-free bridged to CTFontRef,
@@ -76,9 +83,12 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
      In iOS6, UIFont is a wrapper for CTFontRef, so CoreText can alse use UIfont,
      but UILabel/UITextView cannot use CTFontRef.
      
+     iOS7之后UIFont和CTFontRef是toll-free的，iOS6中UIFont是CTFoutRef的封装，这里无论CoreText还是UIKit都使用UIFont
+     
      We use UIFont for both CoreText and UIKit.
      */
     UIFont *font = [self attribute:NSFontAttributeName atIndex:index];
+    // 小于等于iOS6将CTFontRef转换为UIFont
     if (kSystemVersion <= 6) {
         if (font) {
             if (CFGetTypeID((__bridge CFTypeRef)(font)) == CTFontGetTypeID()) {
@@ -89,24 +99,29 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return font;
 }
 
+// 默认返回第一个
 - (NSNumber *)kern {
     return [self kernAtIndex:0];
 }
 
+// 返回指定索引的字间距
 - (NSNumber *)kernAtIndex:(NSUInteger)index {
     return [self attribute:NSKernAttributeName atIndex:index];
 }
 
+// 默认返回第一个字符的颜色
 - (UIColor *)color {
     return [self colorAtIndex:0];
 }
 
+// 返回指定索引的颜色
 - (UIColor *)colorAtIndex:(NSUInteger)index {
     UIColor *color = [self attribute:NSForegroundColorAttributeName atIndex:index];
     if (!color) {
         CGColorRef ref = (__bridge CGColorRef)([self attribute:(NSString *)kCTForegroundColorAttributeName atIndex:index]);
         color = [UIColor colorWithCGColor:ref];
     }
+    // 如果是CGColorRef转换为UIColor
     if (color && ![color isKindOfClass:[UIColor class]]) {
         if (CFGetTypeID((__bridge CFTypeRef)(color)) == CGColorGetTypeID()) {
             color = [UIColor colorWithCGColor:(__bridge CGColorRef)(color)];
@@ -117,26 +132,32 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return color;
 }
 
+// 获取默认背景色
 - (UIColor *)backgroundColor {
     return [self backgroundColorAtIndex:0];
 }
 
+// 获取指定索引的背景色
 - (UIColor *)backgroundColorAtIndex:(NSUInteger)index {
     return [self attribute:NSBackgroundColorAttributeName atIndex:index];
 }
 
+// 获取笔画宽度
 - (NSNumber *)strokeWidth {
     return [self strokeWidthAtIndex:0];
 }
 
+// 获取指定索引的笔画宽度
 - (NSNumber *)strokeWidthAtIndex:(NSUInteger)index {
     return [self attribute:NSStrokeWidthAttributeName atIndex:index];
 }
 
+// 获取填充颜色
 - (UIColor *)strokeColor {
     return [self strokeColorAtIndex:0];
 }
 
+// 获取指定索引的填充颜色
 - (UIColor *)strokeColorAtIndex:(NSUInteger)index {
     UIColor *color = [self attribute:NSStrokeColorAttributeName atIndex:index];
     if (!color) {
@@ -146,27 +167,33 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return color;
 }
 
+// 获取阴影
 - (NSShadow *)shadow {
     return [self shadowAtIndex:0];
 }
 
+// 获取指定索引的阴影
 - (NSShadow *)shadowAtIndex:(NSUInteger)index {
     return [self attribute:NSShadowAttributeName atIndex:index];
 }
 
+// 获取默认的删除线
 - (NSUnderlineStyle)strikethroughStyle {
     return [self strikethroughStyleAtIndex:0];
 }
 
+// 获取指定索引的删除线
 - (NSUnderlineStyle)strikethroughStyleAtIndex:(NSUInteger)index {
     NSNumber *style = [self attribute:NSStrikethroughStyleAttributeName atIndex:index];
     return style.integerValue;
 }
 
+// 获取删除线颜色
 - (UIColor *)strikethroughColor {
     return [self strikethroughColorAtIndex:0];
 }
 
+// 获取指定索引的删除线颜色
 - (UIColor *)strikethroughColorAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:NSStrikethroughColorAttributeName atIndex:index];
@@ -174,19 +201,23 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取下划线类型
 - (NSUnderlineStyle)underlineStyle {
     return [self underlineStyleAtIndex:0];
 }
 
+// 获取指定索引的下划线类型
 - (NSUnderlineStyle)underlineStyleAtIndex:(NSUInteger)index {
     NSNumber *style = [self attribute:NSUnderlineStyleAttributeName atIndex:index];
     return style.integerValue;
 }
 
+// 获取下划线颜色
 - (UIColor *)underlineColor {
     return [self underlineColorAtIndex:0];
 }
 
+// 获取指定索引的下划线颜色
 - (UIColor *)underlineColorAtIndex:(NSUInteger)index {
     UIColor *color = nil;
     if (kSystemVersion >= 7) {
@@ -199,18 +230,22 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return color;
 }
 
+// 获取连字
 - (NSNumber *)ligature {
     return [self ligatureAtIndex:0];
 }
 
+// 获取指定索引的连字
 - (NSNumber *)ligatureAtIndex:(NSUInteger)index {
     return [self attribute:NSLigatureAttributeName atIndex:index];
 }
 
+// 获取文本效果
 - (NSString *)textEffect {
     return [self textEffectAtIndex:0];
 }
 
+// 获取指定索引的文本效果
 - (NSString *)textEffectAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:NSTextEffectAttributeName atIndex:index];
@@ -218,10 +253,12 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取倾斜度
 - (NSNumber *)obliqueness {
     return [self obliquenessAtIndex:0];
 }
 
+// 获取指定索引的倾斜度
 - (NSNumber *)obliquenessAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:NSObliquenessAttributeName atIndex:index];
@@ -229,10 +266,12 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取字符水平扩展宽度
 - (NSNumber *)expansion {
     return [self expansionAtIndex:0];
 }
 
+// 获取指定索引的水平扩展宽度
 - (NSNumber *)expansionAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:NSExpansionAttributeName atIndex:index];
@@ -240,10 +279,12 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取基线偏移量
 - (NSNumber *)baselineOffset {
     return [self baselineOffsetAtIndex:0];
 }
 
+// 获取指定索引的基线偏移量
 - (NSNumber *)baselineOffsetAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:NSBaselineOffsetAttributeName atIndex:index];
@@ -251,19 +292,23 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取是否垂直排版
 - (BOOL)verticalGlyphForm {
     return [self verticalGlyphFormAtIndex:0];
 }
 
+// 获取指定索引的字符是否是垂直排版
 - (BOOL)verticalGlyphFormAtIndex:(NSUInteger)index {
     NSNumber *num = [self attribute:NSVerticalGlyphFormAttributeName atIndex:index];
     return num.boolValue;
 }
 
+// 获取语言
 - (NSString *)language {
     return [self languageAtIndex:0];
 }
 
+// 获取指定索引字符的语言
 - (NSString *)languageAtIndex:(NSUInteger)index {
     if (kSystemVersion >= 7) {
         return [self attribute:(id)kCTLanguageAttributeName atIndex:index];
@@ -271,18 +316,22 @@ YYSYNTH_DUMMY_CLASS(NSAttributedString_YYText)
     return nil;
 }
 
+// 获取文字书写方向
 - (NSArray *)writingDirection {
     return [self writingDirectionAtIndex:0];
 }
 
+// 获取指定索引的字符的文字书写方向
 - (NSArray *)writingDirectionAtIndex:(NSUInteger)index {
     return [self attribute:(id)kCTWritingDirectionAttributeName atIndex:index];
 }
 
+// 获取段落样式
 - (NSParagraphStyle *)paragraphStyle {
     return [self paragraphStyleAtIndex:0];
 }
 
+// 获取指定索引的段落样式
 - (NSParagraphStyle *)paragraphStyleAtIndex:(NSUInteger)index {
     /*
      NSParagraphStyle is NOT toll-free bridged to CTParagraphStyleRef.
@@ -311,54 +360,67 @@ NSParagraphStyle *style = [self paragraphStyleAtIndex:index]; \
 if (!style) style = [NSParagraphStyle defaultParagraphStyle]; \
 return style. _attr_;
 
+// 文本对齐方式
 - (NSTextAlignment)alignment {
     ParagraphAttribute(alignment);
 }
 
+// 换行模式
 - (NSLineBreakMode)lineBreakMode {
     ParagraphAttribute(lineBreakMode);
 }
 
+// 行距
 - (CGFloat)lineSpacing {
     ParagraphAttribute(lineSpacing);
 }
 
+// 段落距离
 - (CGFloat)paragraphSpacing {
     ParagraphAttribute(paragraphSpacing);
 }
 
+// 段落顶部到首行文字开头的距离
 - (CGFloat)paragraphSpacingBefore {
     ParagraphAttribute(paragraphSpacingBefore);
 }
 
+// 首行缩进
 - (CGFloat)firstLineHeadIndent {
     ParagraphAttribute(firstLineHeadIndent);
 }
 
+// 段落头部缩进
 - (CGFloat)headIndent {
     ParagraphAttribute(headIndent);
 }
 
+// 段落尾部缩进
 - (CGFloat)tailIndent {
     ParagraphAttribute(tailIndent);
 }
 
+// 最小行高
 - (CGFloat)minimumLineHeight {
     ParagraphAttribute(minimumLineHeight);
 }
 
+// 最大行高
 - (CGFloat)maximumLineHeight {
     ParagraphAttribute(maximumLineHeight);
 }
 
+// 行高放大倍数
 - (CGFloat)lineHeightMultiple {
     ParagraphAttribute(lineHeightMultiple);
 }
 
+// 文字方向
 - (NSWritingDirection)baseWritingDirection {
     ParagraphAttribute(baseWritingDirection);
 }
 
+// 连字
 - (float)hyphenationFactor {
     ParagraphAttribute(hyphenationFactor);
 }
@@ -368,63 +430,78 @@ return style. _attr_;
     ParagraphAttribute(defaultTabInterval);
 }
 
+// 应该是记录对齐方式以及换行位置
 - (NSArray *)tabStops {
     if (!kiOS7Later) return nil;
     ParagraphAttribute(tabStops);
 }
 
+// 对齐方式
 - (NSTextAlignment)alignmentAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(alignment);
 }
 
+// 换行方式
 - (NSLineBreakMode)lineBreakModeAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(lineBreakMode);
 }
 
+// 行距
 - (CGFloat)lineSpacingAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(lineSpacing);
 }
 
+// 段落后的距离
 - (CGFloat)paragraphSpacingAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(paragraphSpacing);
 }
 
+// 段落顶部到文字头部的距离
 - (CGFloat)paragraphSpacingBeforeAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(paragraphSpacingBefore);
 }
 
+// 首行缩进
 - (CGFloat)firstLineHeadIndentAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(firstLineHeadIndent);
 }
 
+// 段落头部缩进
 - (CGFloat)headIndentAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(headIndent);
 }
 
+// 段落尾部缩进
 - (CGFloat)tailIndentAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(tailIndent);
 }
 
+// 最小行高
 - (CGFloat)minimumLineHeightAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(minimumLineHeight);
 }
 
+// 最大行高
 - (CGFloat)maximumLineHeightAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(maximumLineHeight);
 }
 
+// 行高放大倍数
 - (CGFloat)lineHeightMultipleAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(lineHeightMultiple);
 }
 
+// 文字书写方向
 - (NSWritingDirection)baseWritingDirectionAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(baseWritingDirection);
 }
 
+// 连字
 - (float)hyphenationFactorAtIndex:(NSUInteger)index {
     ParagraphAttributeAtIndex(hyphenationFactor);
 }
 
+// 默认tab长度
 - (CGFloat)defaultTabIntervalAtIndex:(NSUInteger)index {
     if (!kiOS7Later) return 0;
     ParagraphAttributeAtIndex(defaultTabInterval);
@@ -438,6 +515,7 @@ return style. _attr_;
 #undef ParagraphAttribute
 #undef ParagraphAttributeAtIndex
 
+// 阴影对象
 - (YYTextShadow *)textShadow {
     return [self textShadowAtIndex:0];
 }
@@ -446,6 +524,7 @@ return style. _attr_;
     return [self attribute:YYTextShadowAttributeName atIndex:index];
 }
 
+// 内部阴影对象
 - (YYTextShadow *)textInnerShadow {
     return [self textInnerShadowAtIndex:0];
 }
@@ -454,6 +533,7 @@ return style. _attr_;
     return [self attribute:YYTextInnerShadowAttributeName atIndex:index];
 }
 
+// 下划线对象
 - (YYTextDecoration *)textUnderline {
     return [self textUnderlineAtIndex:0];
 }
@@ -462,6 +542,7 @@ return style. _attr_;
     return [self attribute:YYTextUnderlineAttributeName atIndex:index];
 }
 
+// 删除线对象
 - (YYTextDecoration *)textStrikethrough {
     return [self textStrikethroughAtIndex:0];
 }
@@ -470,6 +551,7 @@ return style. _attr_;
     return [self attribute:YYTextStrikethroughAttributeName atIndex:index];
 }
 
+// 文本边界对象
 - (YYTextBorder *)textBorder {
     return [self textBorderAtIndex:0];
 }
@@ -478,6 +560,7 @@ return style. _attr_;
     return [self attribute:YYTextBorderAttributeName atIndex:index];
 }
 
+// 文本背景边界对象
 - (YYTextBorder *)textBackgroundBorder {
     return [self textBackgroundBorderAtIndex:0];
 }
@@ -486,6 +569,7 @@ return style. _attr_;
     return [self attribute:YYTextBackedStringAttributeName atIndex:index];
 }
 
+// 文本字形转换
 - (CGAffineTransform)textGlyphTransform {
     return [self textGlyphTransformAtIndex:0];
 }
@@ -496,6 +580,7 @@ return style. _attr_;
     return [value CGAffineTransformValue];
 }
 
+// 获取原文本
 - (NSString *)plainTextForRange:(NSRange)range {
     if (range.location == NSNotFound ||range.length == NSNotFound) return nil;
     NSMutableString *result = [NSMutableString string];
@@ -512,6 +597,7 @@ return style. _attr_;
     return result;
 }
 
+// 获取附件属性字符串（自定义表情）
 + (NSMutableAttributedString *)attachmentStringWithContent:(id)content
                                                contentMode:(UIViewContentMode)contentMode
                                                      width:(CGFloat)width
@@ -519,22 +605,27 @@ return style. _attr_;
                                                    descent:(CGFloat)descent {
     NSMutableAttributedString *atr = [[NSMutableAttributedString alloc] initWithString:YYTextAttachmentToken];
     
+    // 初始化附件（可以是emoji）
     YYTextAttachment *attach = [YYTextAttachment new];
     attach.content = content;
     attach.contentMode = contentMode;
+    // 存入属性
     [atr setTextAttachment:attach range:NSMakeRange(0, atr.length)];
     
+    // 初始化TextRunDelegate（预留出来附件的为孩子）
     YYTextRunDelegate *delegate = [YYTextRunDelegate new];
     delegate.width = width;
     delegate.ascent = ascent;
     delegate.descent = descent;
     CTRunDelegateRef delegateRef = delegate.CTRunDelegate;
+    // 设置属性
     [atr setRunDelegate:delegateRef range:NSMakeRange(0, atr.length)];
     if (delegate) CFRelease(delegateRef);
     
     return atr;
 }
 
+// 获取附件属性字符串（自定义表情）
 + (NSMutableAttributedString *)attachmentStringWithContent:(id)content
                                                contentMode:(UIViewContentMode)contentMode
                                             attachmentSize:(CGSize)attachmentSize
@@ -542,11 +633,13 @@ return style. _attr_;
                                                  alignment:(YYTextVerticalAlignment)alignment {
     NSMutableAttributedString *atr = [[NSMutableAttributedString alloc] initWithString:YYTextAttachmentToken];
     
+    // 初始化附件变量
     YYTextAttachment *attach = [YYTextAttachment new];
     attach.content = content;
     attach.contentMode = contentMode;
     [atr setTextAttachment:attach range:NSMakeRange(0, atr.length)];
     
+    // 初始化预留位置变量，并根据对齐方式设置自定义attach的位置
     YYTextRunDelegate *delegate = [YYTextRunDelegate new];
     delegate.width = attachmentSize.width;
     switch (alignment) {
@@ -581,7 +674,7 @@ return style. _attr_;
             delegate.descent = 0;
         } break;
     }
-    
+    // 为字符串设置CTRunDelegateRef属性
     CTRunDelegateRef delegateRef = delegate.CTRunDelegate;
     [atr setRunDelegate:delegateRef range:NSMakeRange(0, atr.length)];
     if (delegate) CFRelease(delegateRef);
@@ -594,6 +687,7 @@ return style. _attr_;
     if (!image || fontSize <= 0) return nil;
     
     BOOL hasAnim = NO;
+    // 判断是否包含动画图片
     if (image.images.count > 1) {
         hasAnim = YES;
     } else if ([image conformsToProtocol:@protocol(YYAnimatedImage)]) {
@@ -601,18 +695,23 @@ return style. _attr_;
         if (ani.animatedImageFrameCount > 1) hasAnim = YES;
     }
     
+    // 获取默认的ascent、descent和bounding
     CGFloat ascent = YYEmojiGetAscentWithFontSize(fontSize);
     CGFloat descent = YYEmojiGetDescentWithFontSize(fontSize);
     CGRect bounding = YYEmojiGetGlyphBoundingRectWithFontSize(fontSize);
     
+    // 预留附件（emoji）位置
     YYTextRunDelegate *delegate = [YYTextRunDelegate new];
     delegate.ascent = ascent;
     delegate.descent = descent;
+    // 宽度，加上两边的边距
     delegate.width = bounding.size.width + 2 * bounding.origin.x;
     
+    // 设置附件（emoji）
     YYTextAttachment *attachment = [YYTextAttachment new];
     attachment.contentMode = UIViewContentModeScaleAspectFit;
     attachment.contentInsets = UIEdgeInsetsMake(ascent - (bounding.size.height + bounding.origin.y), bounding.origin.x, descent + bounding.origin.y, bounding.origin.x);
+    // 根据是否是动态度，设置content
     if (hasAnim) {
         YYAnimatedImageView *view = [YYAnimatedImageView new];
         view.frame = bounding;
@@ -623,6 +722,7 @@ return style. _attr_;
         attachment.content = image;
     }
     
+    // 初始化属性字符串，并设置attachment和TextRunDelegate属性
     NSMutableAttributedString *atr = [[NSMutableAttributedString alloc] initWithString:YYTextAttachmentToken];
     [atr setTextAttachment:attachment range:NSMakeRange(0, atr.length)];
     CTRunDelegateRef ctDelegate = delegate.CTRunDelegate;
@@ -632,17 +732,21 @@ return style. _attr_;
     return atr;
 }
 
+// 返回属性字符串的长度
 - (NSRange)rangeOfAll {
     return NSMakeRange(0, self.length);
 }
 
+// 属性字符串的所有属性是否是一样的
 - (BOOL)isSharedAttributesInAllRange {
     __block BOOL shared = YES;
+    // 记录第一个字符的属性
     __block NSDictionary *firstAttrs = nil;
     [self enumerateAttributesInRange:self.rangeOfAll options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(NSDictionary *attrs, NSRange range, BOOL *stop) {
         if (range.location == 0) {
             firstAttrs = attrs;
         } else {
+            // 与第一个字符的属性对比
             if (firstAttrs.count != attrs.count) {
                 shared = NO;
                 *stop = YES;
@@ -657,6 +761,7 @@ return style. _attr_;
     return shared;
 }
 
+// 是否可以使用UIKit绘图
 - (BOOL)canDrawWithUIKit {
     static NSMutableSet *failSet;
     static dispatch_once_t onceToken;
@@ -714,7 +819,9 @@ return style. _attr_;
 
 @implementation NSMutableAttributedString (YYText)
 
+// 设置字符串的属性，如果传入nil，等于清除属性
 - (void)setAttributes:(NSDictionary *)attributes {
+    // 先清空，然后再设置
     if (attributes == (id)[NSNull null]) attributes = nil;
     [self setAttributes:@{} range:NSMakeRange(0, self.length)];
     [attributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
@@ -722,22 +829,26 @@ return style. _attr_;
     }];
 }
 
+// 根据属性明设置属性
 - (void)setAttribute:(NSString *)name value:(id)value {
     [self setAttribute:name value:value range:NSMakeRange(0, self.length)];
 }
 
+// 设置指定范围内的属性
 - (void)setAttribute:(NSString *)name value:(id)value range:(NSRange)range {
     if (!name || [NSNull isEqual:name]) return;
     if (value && ![NSNull isEqual:value]) [self addAttribute:name value:value range:range];
     else [self removeAttribute:name range:range];
 }
 
+// 清除所有属性
 - (void)removeAttributesInRange:(NSRange)range {
     [self setAttributes:nil range:range];
 }
 
 #pragma mark - Property Setter
 
+// 设置字体
 - (void)setFont:(UIFont *)font {
     /*
      In iOS7 and later, UIFont is toll-free bridged to CTFontRef,
@@ -751,78 +862,97 @@ return style. _attr_;
     [self setFont:font range:NSMakeRange(0, self.length)];
 }
 
+// 设置字距
 - (void)setKern:(NSNumber *)kern {
     [self setKern:kern range:NSMakeRange(0, self.length)];
 }
 
+// 设置颜色
 - (void)setColor:(UIColor *)color {
     [self setColor:color range:NSMakeRange(0, self.length)];
 }
 
+// 设置背景色
 - (void)setBackgroundColor:(UIColor *)backgroundColor {
     [self setBackgroundColor:backgroundColor range:NSMakeRange(0, self.length)];
 }
 
+// 设置填宽度
 - (void)setStrokeWidth:(NSNumber *)strokeWidth {
     [self setStrokeWidth:strokeWidth range:NSMakeRange(0, self.length)];
 }
 
+// 设置填充色
 - (void)setStrokeColor:(UIColor *)strokeColor {
     [self setStrokeColor:strokeColor range:NSMakeRange(0, self.length)];
 }
 
+// 设置阴影
 - (void)setShadow:(NSShadow *)shadow {
     [self setShadow:shadow range:NSMakeRange(0, self.length)];
 }
 
+// 设置删除线
 - (void)setStrikethroughStyle:(NSUnderlineStyle)strikethroughStyle {
     [self setStrikethroughStyle:strikethroughStyle range:NSMakeRange(0, self.length)];
 }
 
+// 设置删除线颜色
 - (void)setStrikethroughColor:(UIColor *)strikethroughColor {
     [self setStrikethroughColor:strikethroughColor range:NSMakeRange(0, self.length)];
 }
 
+// 设置下划线类型
 - (void)setUnderlineStyle:(NSUnderlineStyle)underlineStyle {
     [self setUnderlineStyle:underlineStyle range:NSMakeRange(0, self.length)];
 }
 
+// 设置下划线颜色
 - (void)setUnderlineColor:(UIColor *)underlineColor {
     [self setUnderlineColor:underlineColor range:NSMakeRange(0, self.length)];
 }
 
+// 设置连字
 - (void)setLigature:(NSNumber *)ligature {
     [self setLigature:ligature range:NSMakeRange(0, self.length)];
 }
 
+// 设置文字效果，目前只支持一种
 - (void)setTextEffect:(NSString *)textEffect {
     [self setTextEffect:textEffect range:NSMakeRange(0, self.length)];
 }
 
+// 设置倾斜度
 - (void)setObliqueness:(NSNumber *)obliqueness {
     [self setObliqueness:obliqueness range:NSMakeRange(0, self.length)];
 }
 
+// 设置宽度倍数
 - (void)setExpansion:(NSNumber *)expansion {
     [self setExpansion:expansion range:NSMakeRange(0, self.length)];
 }
 
+// 设置基线偏移
 - (void)setBaselineOffset:(NSNumber *)baselineOffset {
     [self setBaselineOffset:baselineOffset range:NSMakeRange(0, self.length)];
 }
 
+// 设置垂直排版还是水平排版
 - (void)setVerticalGlyphForm:(BOOL)verticalGlyphForm {
     [self setVerticalGlyphForm:verticalGlyphForm range:NSMakeRange(0, self.length)];
 }
 
+// 设置语言
 - (void)setLanguage:(NSString *)language {
     [self setLanguage:language range:NSMakeRange(0, self.length)];
 }
 
+// 设置书写方向
 - (void)setWritingDirection:(NSArray *)writingDirection {
     [self setWritingDirection:writingDirection range:NSMakeRange(0, self.length)];
 }
 
+// 设置段落格式
 - (void)setParagraphStyle:(NSParagraphStyle *)paragraphStyle {
     /*
      NSParagraphStyle is NOT toll-free bridged to CTParagraphStyleRef.
@@ -835,96 +965,119 @@ return style. _attr_;
     [self setParagraphStyle:paragraphStyle range:NSMakeRange(0, self.length)];
 }
 
+// 设置对齐方式
 - (void)setAlignment:(NSTextAlignment)alignment {
     [self setAlignment:alignment range:NSMakeRange(0, self.length)];
 }
 
+// 设置书写方向
 - (void)setBaseWritingDirection:(NSWritingDirection)baseWritingDirection {
     [self setBaseWritingDirection:baseWritingDirection range:NSMakeRange(0, self.length)];
 }
 
+// 设置行距
 - (void)setLineSpacing:(CGFloat)lineSpacing {
     [self setLineSpacing:lineSpacing range:NSMakeRange(0, self.length)];
 }
 
+// 设置段落距离
 - (void)setParagraphSpacing:(CGFloat)paragraphSpacing {
     [self setParagraphSpacing:paragraphSpacing range:NSMakeRange(0, self.length)];
 }
 
+// 设置段落顶部到开头文本的距离
 - (void)setParagraphSpacingBefore:(CGFloat)paragraphSpacingBefore {
     [self setParagraphSpacing:paragraphSpacingBefore range:NSMakeRange(0, self.length)];
 }
 
+// 设置首行缩进
 - (void)setFirstLineHeadIndent:(CGFloat)firstLineHeadIndent {
     [self setFirstLineHeadIndent:firstLineHeadIndent range:NSMakeRange(0, self.length)];
 }
 
+// 设置段落前端缩进
 - (void)setHeadIndent:(CGFloat)headIndent {
     [self setHeadIndent:headIndent range:NSMakeRange(0, self.length)];
 }
 
+// 设置段落后端缩进
 - (void)setTailIndent:(CGFloat)tailIndent {
     [self setTailIndent:tailIndent range:NSMakeRange(0, self.length)];
 }
 
+// 设置换行模式
 - (void)setLineBreakMode:(NSLineBreakMode)lineBreakMode {
     [self setLineBreakMode:lineBreakMode range:NSMakeRange(0, self.length)];
 }
 
+// 设置最小行高度
 - (void)setMinimumLineHeight:(CGFloat)minimumLineHeight {
     [self setMinimumLineHeight:minimumLineHeight range:NSMakeRange(0, self.length)];
 }
 
+// 设置最大行高度
 - (void)setMaximumLineHeight:(CGFloat)maximumLineHeight {
     [self setMaximumLineHeight:maximumLineHeight range:NSMakeRange(0, self.length)];
 }
 
+// 设置行高度倍数
 - (void)setLineHeightMultiple:(CGFloat)lineHeightMultiple {
     [self setLineHeightMultiple:lineHeightMultiple range:NSMakeRange(0, self.length)];
 }
 
+// 设置连字因子
 - (void)setHyphenationFactor:(float)hyphenationFactor {
     [self setHyphenationFactor:hyphenationFactor range:NSMakeRange(0, self.length)];
 }
 
+// 设置默认tab间距
 - (void)setDefaultTabInterval:(CGFloat)defaultTabInterval {
     [self setDefaultTabInterval:defaultTabInterval range:NSMakeRange(0, self.length)];
 }
 
+// 设置换行位置
 - (void)setTabStops:(NSArray *)tabStops {
     [self setTabStops:tabStops range:NSMakeRange(0, self.length)];
 }
 
+// 设置阴影对象
 - (void)setTextShadow:(YYTextShadow *)textShadow {
     [self setTextShadow:textShadow range:NSMakeRange(0, self.length)];
 }
 
+// 设置内部阴影
 - (void)setTextInnerShadow:(YYTextShadow *)textInnerShadow {
     [self setTextInnerShadow:textInnerShadow range:NSMakeRange(0, self.length)];
 }
 
+// 设置装饰线（下划线）
 - (void)setTextUnderline:(YYTextDecoration *)textUnderline {
     [self setTextUnderline:textUnderline range:NSMakeRange(0, self.length)];
 }
 
+// 设置装饰线（删除线）
 - (void)setTextStrikethrough:(YYTextDecoration *)textStrikethrough {
     [self setTextStrikethrough:textStrikethrough range:NSMakeRange(0, self.length)];
 }
 
+// 设置文本边界
 - (void)setTextBorder:(YYTextBorder *)textBorder {
     [self setTextBorder:textBorder range:NSMakeRange(0, self.length)];
 }
 
+// 设置文本背景边界
 - (void)setTextBackgroundBorder:(YYTextBorder *)textBackgroundBorder {
     [self setTextBackgroundBorder:textBackgroundBorder range:NSMakeRange(0, self.length)];
 }
 
+// 设置字形转换
 - (void)setTextGlyphTransform:(CGAffineTransform)textGlyphTransform {
     [self setTextGlyphTransform:textGlyphTransform range:NSMakeRange(0, self.length)];
 }
 
 #pragma mark - Range Setter
 
+// 设置字体
 - (void)setFont:(UIFont *)font range:(NSRange)range {
     /*
      In iOS7 and later, UIFont is toll-free bridged to CTFontRef,
@@ -1236,6 +1389,7 @@ return style. _attr_;
     [self setAttribute:YYTextGlyphTransformAttributeName value:value range:range];
 }
 
+// 设置高亮的范围、颜色、背景色和回调
 - (void)setTextHighlightRange:(NSRange)range
                         color:(UIColor *)color
               backgroundColor:(UIColor *)backgroundColor
@@ -1250,6 +1404,7 @@ return style. _attr_;
     [self setTextHighlight:highlight range:range];
 }
 
+// 设置高亮的范围、颜色、背景色和回调
 - (void)setTextHighlightRange:(NSRange)range
                         color:(UIColor *)color
               backgroundColor:(UIColor *)backgroundColor
@@ -1262,6 +1417,7 @@ return style. _attr_;
                 longPressAction:nil];
 }
 
+// 设置高亮的范围、颜色、背景色
 - (void)setTextHighlightRange:(NSRange)range
                         color:(UIColor *)color
               backgroundColor:(UIColor *)backgroundColor
@@ -1274,17 +1430,21 @@ return style. _attr_;
                 longPressAction:nil];
 }
 
+// 将字符串插入指定的位置
 - (void)insertString:(NSString *)string atIndex:(NSUInteger)location {
     [self replaceCharactersInRange:NSMakeRange(location, 0) withString:string];
+    // 🤔️这里不知道什么是不连续的属性
     [self removeDiscontinuousAttributesInRange:NSMakeRange(location, string.length)];
 }
 
+// 拼接字符串
 - (void)appendString:(NSString *)string {
     NSUInteger length = self.length;
     [self replaceCharactersInRange:NSMakeRange(length, 0) withString:string];
     [self removeDiscontinuousAttributesInRange:NSMakeRange(length, string.length)];
 }
 
+// 🤔️ 应该是联合emoji的东西
 - (void)setClearColorToJoinedEmoji {
     NSString *str = self.string;
     if (str.length < 8) return;

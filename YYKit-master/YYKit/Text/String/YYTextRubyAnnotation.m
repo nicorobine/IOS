@@ -13,6 +13,7 @@
 
 @implementation YYTextRubyAnnotation
 
+// 初始化方法
 - (instancetype)init {
     self = super.init;
     self.alignment = kCTRubyAlignmentAuto;
@@ -21,6 +22,7 @@
     return self;
 }
 
+// 根据CTRubyAnnotationRef初始化
 + (instancetype)rubyWithCTRubyRef:(CTRubyAnnotationRef)ctRuby {
     if (!ctRuby) return nil;
     YYTextRubyAnnotation *one = [self new];
@@ -34,6 +36,7 @@
     return one;
 }
 
+// 创建并返回CTRuby对象
 - (CTRubyAnnotationRef)CTRubyAnnotation CF_RETURNS_RETAINED {
     if (((long)CTRubyAnnotationCreate + 1) == 1) return NULL; // system not support
     
@@ -46,6 +49,7 @@
     return ruby;
 }
 
+// 实现NSCopying协议
 - (id)copyWithZone:(NSZone *)zone {
     YYTextRubyAnnotation *one = [self.class new];
     one.alignment = _alignment;
@@ -58,6 +62,7 @@
     return one;
 }
 
+// 实现NSCoding协议
 - (void)encodeWithCoder:(NSCoder *)aCoder {
     [aCoder encodeObject:@(_alignment) forKey:@"alignment"];
     [aCoder encodeObject:@(_overhang) forKey:@"overhang"];
@@ -68,6 +73,7 @@
     [aCoder encodeObject:_textInline forKey:@"textInline"];
 }
 
+// 根据coder初始化
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [self init];
     _alignment = ((NSNumber *)[aDecoder decodeObjectForKey:@"alignment"]).intValue;

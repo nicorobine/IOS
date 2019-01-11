@@ -17,6 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Wrapper for CTRunDelegateRef.
  
+ CTRunDelegateRef 可以实现预留图片显示的位置
+ 
  Example:
  
      YYTextRunDelegate *delegate = [YYTextRunDelegate new];
@@ -35,6 +37,10 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates and returns the CTRunDelegate.
  
+ 创建并返回一个CTRunDelegate对象
+ 需要注意的是，需要自己调用CFRelease()释放。
+ CTRunDelegateRef对YYTextRunDelegate是强引用
+ 
  @discussion You need call CFRelease() after used.
  The CTRunDelegateRef has a strong reference to this YYTextRunDelegate object.
  In CoreText, use CTRunDelegateGetRefCon() to get this YYTextRunDelegate object.
@@ -45,21 +51,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Additional information about the the run delegate.
+ run delegate的附加信息
  */
 @property (nullable, nonatomic, strong) NSDictionary *userInfo;
 
 /**
  The typographic ascent of glyphs in the run.
+ 在run中字形的印刷上行
  */
 @property (nonatomic) CGFloat ascent;
 
 /**
  The typographic descent of glyphs in the run.
+ 在run中字形的印刷下行
  */
 @property (nonatomic) CGFloat descent;
 
 /**
  The typographic width of glyphs in the run.
+ 在run中字形的印刷宽度
  */
 @property (nonatomic) CGFloat width;
 

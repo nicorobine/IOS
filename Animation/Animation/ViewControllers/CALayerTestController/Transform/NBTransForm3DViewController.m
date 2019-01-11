@@ -42,11 +42,36 @@
 #import "NBTransForm3DViewController.h"
 
 @interface NBTransForm3DViewController ()
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
+@property (weak, nonatomic) IBOutlet UILabel *valueLabel;
+@property (weak, nonatomic) IBOutlet UISlider *m11Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m12Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m13Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m14Slider;
 
-@property (weak, nonatomic) IBOutlet UIView *containerView;
+@property (weak, nonatomic) IBOutlet UISlider *m21Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m22Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m23Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m24Slider;
+
+@property (weak, nonatomic) IBOutlet UISlider *m31Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m32;
+@property (weak, nonatomic) IBOutlet UISlider *m33Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m34Slider;
+
+@property (weak, nonatomic) IBOutlet UISlider *m41Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m42Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m43Slider;
+@property (weak, nonatomic) IBOutlet UISlider *m44Slider;
+@property (weak, nonatomic) IBOutlet UIImageView *testImageView;
+
+@property (strong, nonatomic) UIView *containerView;
 @property (nonatomic, strong) CALayer* imgLayer;
 @property (nonatomic, strong) CALayer* imgLayer1;
 
+@property (nonatomic, assign) CATransform3D baseTransform;
+
+@property (nonatomic, assign) CATransform3D autoTransform;
 @end
 
 @implementation NBTransForm3DViewController
@@ -56,30 +81,182 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.edgesForExtendedLayout = UIRectEdgeNone;
+    self.baseTransform = CATransform3DIdentity;
+    self.autoTransform = CATransform3DIdentity;
     
-    [self.containerView.layer addSublayer:self.imgLayer];
-    [self.containerView.layer addSublayer:self.imgLayer1];
-//    [self.view.layer addSublayer:self.imgLayer];
-//    [self.view.layer addSublayer:self.imgLayer1];
+    self.scrollView.contentSize = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height*2);
+    self.scrollView.showsVerticalScrollIndicator = YES;
+    
+    UIBarButtonItem* rightItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reset)];
+    
+    self.navigationItem.rightBarButtonItem = rightItem;
+    
+    self.testImageView.layer.transform = self.baseTransform;
+    
+    [self.scrollView addSubview:self.containerView];
+}
+
+#pragma mark - Actions
+
+- (IBAction)m11Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m11 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m11:%g",sender.value];
+}
+- (IBAction)m12Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m12 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m12:%g",sender.value];
+}
+- (IBAction)m13Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m13 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m13:%g",sender.value];
+}
+- (IBAction)m14Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m14 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m14:%g",sender.value];
+}
+
+- (IBAction)m21Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m21 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m21:%g",sender.value];
+}
+- (IBAction)m22Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m22 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m22:%g",sender.value];
+}
+- (IBAction)m23Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m23 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m23:%g",sender.value];
+}
+- (IBAction)m24Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m24 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m24:%g",sender.value];
+}
+
+- (IBAction)m31Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m31 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m31:%g",sender.value];
+}
+- (IBAction)m32Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m32 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m32:%g",sender.value];
+}
+- (IBAction)m33Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m33 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m33:%g",sender.value];
+}
+- (IBAction)m34Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m34 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m34:%g",sender.value];
+}
+- (IBAction)m41Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m41 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m41:%g",sender.value];
+}
+- (IBAction)m42Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m42 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m42:%g",sender.value];
+}
+- (IBAction)m43Slider:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m43 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m43:%g",sender.value];
+}
+- (IBAction)m44Changed:(UISlider *)sender {
+    CATransform3D transform = self.baseTransform;
+    transform.m44 = sender.value;
+    self.baseTransform = transform;
+    self.testImageView.layer.transform = transform;
+    self.title = [NSString stringWithFormat:@"m44:%g",sender.value];
+}
+
+- (void)reset{
+    self.testImageView.layer.transform = CATransform3DIdentity;
+    for (UIView*view in self.scrollView.subviews) {
+        if (view.subviews.count > 0) {
+            for (UIView*temp in view.subviews) {
+                if ([temp isKindOfClass:[UISlider class]]) {
+                    ((UISlider *)temp).value = (((UISlider *)temp).maximumValue + ((UISlider *)temp).minimumValue)/2;
+                }
+            }
+        }
+    }
+}
+
+- (void)start {
+    static NSUInteger time = 1;
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+    dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    dispatch_source_set_event_handler(timer, ^{
+        if (time == 3) {
+            dispatch_cancel(timer);
+            return;
+        }
+        [self performSelector:NSSelectorFromString([NSString stringWithFormat:@"transform_3D_%lu", time++])];
+        
+    });
+    dispatch_resume(timer);
 }
 
 #pragma mark - Test
 
-- (IBAction)transform_3D_1:(UIButton *)sender {
-    
-    self.imgLayer.transform = CATransform3DMakeRotation(M_PI_4, 0, 1, 0);
+- (void)transform_3D_1{
+    self.autoTransform = CATransform3DRotate(self.autoTransform, M_PI_4, 0, 1, 0);
+    self.imgLayer.transform = self.autoTransform;
 }
 
-- (IBAction)transform_3D_2:(UIButton *)sender {
+- (void)transform_3D_2{
     
-    CATransform3D transform = CATransform3DIdentity;
+    CATransform3D transform = self.autoTransform;
     // 通常在-1.0/500和-1.0/1000之间
     transform.m34 = -1.0/500;
-    transform = CATransform3DRotate(transform, M_PI_4, 0, 1, 0);
+    self.autoTransform = transform;
     self.imgLayer.transform = transform;
 }
-- (IBAction)transform_3D_3:(UIButton *)sender {
+- (void)transform_3D_3:(UIButton *)sender {
     
     // containerView的所有子layer应用的转换
     CATransform3D transfrom = CATransform3DIdentity;
@@ -93,7 +270,7 @@
 }
 
 // 测试layer是否绘制背面
-- (IBAction)transform_3D_4:(id)sender {
+- (void)transform_3D_4:(id)sender {
     
     self.imgLayer.transform = CATransform3DMakeRotation(M_PI, 0, 1, 0);
     self.imgLayer1.transform = CATransform3DMakeRotation(M_PI, 0, 1, 0);
@@ -101,14 +278,31 @@
 
 #pragma mark - getter
 
+- (UIView *)containerView
+{
+    if (!_containerView) {
+        _containerView = [[UIView alloc] initWithFrame:CGRectMake(8, self.view.bounds.size.height, self.view.bounds.size.width-16, self.view.bounds.size.height/2)];
+        _containerView.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1];
+        _containerView.layer.cornerRadius = 6.f;
+        [_containerView.layer addSublayer:self.imgLayer];
+        [_containerView.layer addSublayer:self.imgLayer1];
+        UIButton* startBtn = [[UIButton alloc] initWithFrame:CGRectMake(60, _containerView.bounds.size.height- 60, _containerView.bounds.size.width - 120, 44)];
+        startBtn.backgroundColor = [UIColor purpleColor];
+        startBtn.titleLabel.text = @"Start";
+        startBtn.titleLabel.textColor = [UIColor whiteColor];
+        [startBtn addTarget:self action:@selector(start) forControlEvents:UIControlEventTouchUpInside];
+        [_containerView addSubview:startBtn];
+    }
+    return _containerView;
+}
+
 - (CALayer *)imgLayer
 {
     if (!_imgLayer) {
-        
         _imgLayer = [CALayer layer];
         _imgLayer.contentsGravity = kCAGravityResizeAspect;
         _imgLayer.bounds = CGRectMake(0, 0, 100, 100);
-        _imgLayer.position = CGPointMake(150, 200);
+        _imgLayer.position = CGPointMake(120, 80);
         _imgLayer.contents = (__bridge id)[UIImage imageNamed:@"img1"].CGImage;
         _imgLayer.doubleSided = YES;
     }
@@ -118,11 +312,10 @@
 - (CALayer *)imgLayer1
 {
     if (!_imgLayer1) {
-        
         _imgLayer1 = [CALayer layer];
         _imgLayer1.contentsGravity = kCAGravityResizeAspect;
         _imgLayer1.bounds = CGRectMake(0, 0, 100, 100);
-        _imgLayer1.position = CGPointMake(300, 200);
+        _imgLayer1.position = CGPointMake(220, 80);
         _imgLayer1.contents = (__bridge id)[UIImage imageNamed:@"img1"].CGImage;
         _imgLayer1.doubleSided = NO;
     }

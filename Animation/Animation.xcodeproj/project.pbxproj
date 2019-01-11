@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		830DFE6A21BFB8FD0012584D /* NRCombineTransform2DViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 830DFE6921BFB8FD0012584D /* NRCombineTransform2DViewController.m */; };
 		8316D387206B811000676629 /* NBCALayerTestTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D386206B811000676629 /* NBCALayerTestTableViewController.m */; };
 		8316D38D206B853900676629 /* NBBezierPathTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D38C206B853900676629 /* NBBezierPathTestViewController.m */; };
 		8316D390206B858A00676629 /* NBBezierView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8316D38F206B858A00676629 /* NBBezierView.m */; };
@@ -27,7 +28,15 @@
 		837D95C2206A3E7E0018102A /* NBViewAnimationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D95C1206A3E7E0018102A /* NBViewAnimationViewController.m */; };
 		837D95C6206B685F0018102A /* NBCALayerTestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 837D95C5206B685F0018102A /* NBCALayerTestViewController.m */; };
 		83807FB1209C5295002D3F4B /* NBCAGradientLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83807FB0209C5295002D3F4B /* NBCAGradientLayerViewController.m */; };
+		8385F2AA21D5FDA7007CE793 /* NBSubLayersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2A921D5FDA7007CE793 /* NBSubLayersTableViewController.m */; };
+		8385F2AE21D5FDE8007CE793 /* NBCATextViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2AD21D5FDE8007CE793 /* NBCATextViewController.m */; };
+		8385F2D221E4835E007CE793 /* NBCATransfromLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2D121E4835E007CE793 /* NBCATransfromLayerViewController.m */; };
+		8385F2D621E48BD6007CE793 /* NBCAReplicatorLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2D521E48BD6007CE793 /* NBCAReplicatorLayerViewController.m */; };
+		8385F2D921E5C78B007CE793 /* NBReflectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2D821E5C78B007CE793 /* NBReflectionView.m */; };
+		8385F2DE21E5ECD6007CE793 /* NBImplicitAnimationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2DD21E5ECD6007CE793 /* NBImplicitAnimationViewController.m */; };
+		8385F2E221E6F55A007CE793 /* NBExplicitAnimationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8385F2E121E6F55A007CE793 /* NBExplicitAnimationViewController.m */; };
 		8393D0FE20931D83008BB781 /* NBCAShapeLayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8393D0FD20931D83008BB781 /* NBCAShapeLayerViewController.m */; };
+		83C1942921D4D98E004D8A06 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C1942821D4D98E004D8A06 /* GLKit.framework */; };
 		83C6D0282084954F00170676 /* NBTransformSolidViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83C6D0272084954F00170676 /* NBTransformSolidViewController.m */; };
 		83D571F0209C0BD000FFD475 /* UIView+NBTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D571EF209C0BCF00FFD475 /* UIView+NBTransform.m */; };
 /* End PBXBuildFile section */
@@ -43,6 +52,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		830DFE6821BFB8FD0012584D /* NRCombineTransform2DViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NRCombineTransform2DViewController.h; sourceTree = "<group>"; };
+		830DFE6921BFB8FD0012584D /* NRCombineTransform2DViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NRCombineTransform2DViewController.m; sourceTree = "<group>"; };
 		8316D385206B811000676629 /* NBCALayerTestTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCALayerTestTableViewController.h; sourceTree = "<group>"; };
 		8316D386206B811000676629 /* NBCALayerTestTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCALayerTestTableViewController.m; sourceTree = "<group>"; };
 		8316D38B206B853900676629 /* NBBezierPathTestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBBezierPathTestViewController.h; sourceTree = "<group>"; };
@@ -82,8 +93,23 @@
 		837D95C5206B685F0018102A /* NBCALayerTestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCALayerTestViewController.m; sourceTree = "<group>"; };
 		83807FAF209C5295002D3F4B /* NBCAGradientLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCAGradientLayerViewController.h; sourceTree = "<group>"; };
 		83807FB0209C5295002D3F4B /* NBCAGradientLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCAGradientLayerViewController.m; sourceTree = "<group>"; };
+		8385F2A821D5FDA7007CE793 /* NBSubLayersTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBSubLayersTableViewController.h; sourceTree = "<group>"; };
+		8385F2A921D5FDA7007CE793 /* NBSubLayersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBSubLayersTableViewController.m; sourceTree = "<group>"; };
+		8385F2AC21D5FDE8007CE793 /* NBCATextViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCATextViewController.h; sourceTree = "<group>"; };
+		8385F2AD21D5FDE8007CE793 /* NBCATextViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCATextViewController.m; sourceTree = "<group>"; };
+		8385F2D021E4835E007CE793 /* NBCATransfromLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCATransfromLayerViewController.h; sourceTree = "<group>"; };
+		8385F2D121E4835E007CE793 /* NBCATransfromLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCATransfromLayerViewController.m; sourceTree = "<group>"; };
+		8385F2D421E48BD6007CE793 /* NBCAReplicatorLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCAReplicatorLayerViewController.h; sourceTree = "<group>"; };
+		8385F2D521E48BD6007CE793 /* NBCAReplicatorLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCAReplicatorLayerViewController.m; sourceTree = "<group>"; };
+		8385F2D721E5C78B007CE793 /* NBReflectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBReflectionView.h; sourceTree = "<group>"; };
+		8385F2D821E5C78B007CE793 /* NBReflectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBReflectionView.m; sourceTree = "<group>"; };
+		8385F2DC21E5ECD6007CE793 /* NBImplicitAnimationViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBImplicitAnimationViewController.h; sourceTree = "<group>"; };
+		8385F2DD21E5ECD6007CE793 /* NBImplicitAnimationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBImplicitAnimationViewController.m; sourceTree = "<group>"; };
+		8385F2E021E6F55A007CE793 /* NBExplicitAnimationViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBExplicitAnimationViewController.h; sourceTree = "<group>"; };
+		8385F2E121E6F55A007CE793 /* NBExplicitAnimationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBExplicitAnimationViewController.m; sourceTree = "<group>"; };
 		8393D0FC20931D83008BB781 /* NBCAShapeLayerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBCAShapeLayerViewController.h; sourceTree = "<group>"; };
 		8393D0FD20931D83008BB781 /* NBCAShapeLayerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBCAShapeLayerViewController.m; sourceTree = "<group>"; };
+		83C1942821D4D98E004D8A06 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		83C6D0262084954F00170676 /* NBTransformSolidViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NBTransformSolidViewController.h; sourceTree = "<group>"; };
 		83C6D0272084954F00170676 /* NBTransformSolidViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NBTransformSolidViewController.m; sourceTree = "<group>"; };
 		83D571EE209C0BCF00FFD475 /* UIView+NBTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+NBTransform.h"; sourceTree = "<group>"; };
@@ -95,6 +121,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83C1942921D4D98E004D8A06 /* GLKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,6 +135,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		830DFE6721BFB8BC0012584D /* CombineTransform */ = {
+			isa = PBXGroup;
+			children = (
+				830DFE6821BFB8FD0012584D /* NRCombineTransform2DViewController.h */,
+				830DFE6921BFB8FD0012584D /* NRCombineTransform2DViewController.m */,
+			);
+			path = CombineTransform;
+			sourceTree = "<group>";
+		};
 		8316D384206B80E600676629 /* BaseViewController */ = {
 			isa = PBXGroup;
 			children = (
@@ -219,6 +255,7 @@
 				837D9594206A3B9E0018102A /* Animation */,
 				837D95AD206A3B9E0018102A /* AnimationUITests */,
 				837D9593206A3B9E0018102A /* Products */,
+				83C1942721D4D98E004D8A06 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -266,6 +303,7 @@
 		837D95BA206A3BCC0018102A /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				8385F2DA21E5EC70007CE793 /* Animations */,
 				837D95C3206B683A0018102A /* CALayerTestController */,
 				837D95BF206A3E3B0018102A /* UIViewAnimationController */,
 				837D95BE206A3E2D0018102A /* MainControllers */,
@@ -294,6 +332,7 @@
 		837D95C3206B683A0018102A /* CALayerTestController */ = {
 			isa = PBXGroup;
 			children = (
+				830DFE6721BFB8BC0012584D /* CombineTransform */,
 				8393D0FA20931D3D008BB781 /* subClasses */,
 				8316D3AD207207D600676629 /* Transform */,
 				8316D3A6206E1C8700676629 /* VisualEffect */,
@@ -306,9 +345,70 @@
 			path = CALayerTestController;
 			sourceTree = "<group>";
 		};
+		8385F2A721D5F7DC007CE793 /* CATextLayer */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2AC21D5FDE8007CE793 /* NBCATextViewController.h */,
+				8385F2AD21D5FDE8007CE793 /* NBCATextViewController.m */,
+			);
+			path = CATextLayer;
+			sourceTree = "<group>";
+		};
+		8385F2AB21D5FDC2007CE793 /* CATransformLayer */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2D021E4835E007CE793 /* NBCATransfromLayerViewController.h */,
+				8385F2D121E4835E007CE793 /* NBCATransfromLayerViewController.m */,
+			);
+			path = CATransformLayer;
+			sourceTree = "<group>";
+		};
+		8385F2D321E48B9C007CE793 /* CAReplicatorLayer */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2D421E48BD6007CE793 /* NBCAReplicatorLayerViewController.h */,
+				8385F2D521E48BD6007CE793 /* NBCAReplicatorLayerViewController.m */,
+				8385F2D721E5C78B007CE793 /* NBReflectionView.h */,
+				8385F2D821E5C78B007CE793 /* NBReflectionView.m */,
+			);
+			path = CAReplicatorLayer;
+			sourceTree = "<group>";
+		};
+		8385F2DA21E5EC70007CE793 /* Animations */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2DF21E6F4E9007CE793 /* ExplicitAnimation */,
+				8385F2DB21E5EC7B007CE793 /* ImplicitAnimation */,
+			);
+			path = Animations;
+			sourceTree = "<group>";
+		};
+		8385F2DB21E5EC7B007CE793 /* ImplicitAnimation */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2DC21E5ECD6007CE793 /* NBImplicitAnimationViewController.h */,
+				8385F2DD21E5ECD6007CE793 /* NBImplicitAnimationViewController.m */,
+			);
+			path = ImplicitAnimation;
+			sourceTree = "<group>";
+		};
+		8385F2DF21E6F4E9007CE793 /* ExplicitAnimation */ = {
+			isa = PBXGroup;
+			children = (
+				8385F2E021E6F55A007CE793 /* NBExplicitAnimationViewController.h */,
+				8385F2E121E6F55A007CE793 /* NBExplicitAnimationViewController.m */,
+			);
+			path = ExplicitAnimation;
+			sourceTree = "<group>";
+		};
 		8393D0FA20931D3D008BB781 /* subClasses */ = {
 			isa = PBXGroup;
 			children = (
+				8385F2A821D5FDA7007CE793 /* NBSubLayersTableViewController.h */,
+				8385F2A921D5FDA7007CE793 /* NBSubLayersTableViewController.m */,
+				8385F2D321E48B9C007CE793 /* CAReplicatorLayer */,
+				8385F2AB21D5FDC2007CE793 /* CATransformLayer */,
+				8385F2A721D5F7DC007CE793 /* CATextLayer */,
 				8339060F20A04B7C00FCCCBD /* CAEmitterLayer */,
 				83230C10209C4EAD0050C797 /* CAGradientLayer */,
 				8393D0FB20931D49008BB781 /* CAShapeLayer */,
@@ -325,6 +425,14 @@
 				83D571EF209C0BCF00FFD475 /* UIView+NBTransform.m */,
 			);
 			path = CAShapeLayer;
+			sourceTree = "<group>";
+		};
+		83C1942721D4D98E004D8A06 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				83C1942821D4D98E004D8A06 /* GLKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -432,19 +540,27 @@
 				837D95C2206A3E7E0018102A /* NBViewAnimationViewController.m in Sources */,
 				8316D398206C8DD600676629 /* NBCALayerContentsViewController.m in Sources */,
 				83807FB1209C5295002D3F4B /* NBCAGradientLayerViewController.m in Sources */,
+				8385F2D621E48BD6007CE793 /* NBCAReplicatorLayerViewController.m in Sources */,
+				8385F2AA21D5FDA7007CE793 /* NBSubLayersTableViewController.m in Sources */,
+				8385F2D221E4835E007CE793 /* NBCATransfromLayerViewController.m in Sources */,
+				8385F2DE21E5ECD6007CE793 /* NBImplicitAnimationViewController.m in Sources */,
 				837D95A5206A3B9E0018102A /* main.m in Sources */,
 				8316D3B0207207FA00676629 /* NBTransform2DViewController.m in Sources */,
 				837D95BD206A3CB40018102A /* MainViewController.m in Sources */,
 				8316D3AC206E34C600676629 /* NBMaskTestViewController.m in Sources */,
 				8316D3B32072081C00676629 /* NBTransForm3DViewController.m in Sources */,
+				8385F2D921E5C78B007CE793 /* NBReflectionView.m in Sources */,
 				8316D38D206B853900676629 /* NBBezierPathTestViewController.m in Sources */,
+				830DFE6A21BFB8FD0012584D /* NRCombineTransform2DViewController.m in Sources */,
 				837D95C6206B685F0018102A /* NBCALayerTestViewController.m in Sources */,
 				8316D3A9206E1CF200676629 /* NBVisualEffectViewController.m in Sources */,
+				8385F2AE21D5FDE8007CE793 /* NBCATextViewController.m in Sources */,
 				8393D0FE20931D83008BB781 /* NBCAShapeLayerViewController.m in Sources */,
 				83C6D0282084954F00170676 /* NBTransformSolidViewController.m in Sources */,
 				8316D390206B858A00676629 /* NBBezierView.m in Sources */,
 				83D571F0209C0BD000FFD475 /* UIView+NBTransform.m in Sources */,
 				8316D39C206DE6AA00676629 /* NBCoordinateTransformTestViewController.m in Sources */,
+				8385F2E221E6F55A007CE793 /* NBExplicitAnimationViewController.m in Sources */,
 				837D9597206A3B9E0018102A /* AppDelegate.m in Sources */,
 				8339061220A04B9F00FCCCBD /* NBCAEmitterLayerViewController.m in Sources */,
 				8316D387206B811000676629 /* NBCALayerTestTableViewController.m in Sources */,

@@ -14,8 +14,9 @@
 #import "UIColor+YYAdd.h"
 #import "YYWeakProxy.h"
 
-
+// 互斥锁
 static pthread_mutex_t _sharedDebugLock;
+// 调试对象的容器（value是unsafe_unretained的）
 static CFMutableSetRef _sharedDebugTargets = nil;
 static YYTextDebugOption *_sharedDebugOption = nil;
 
@@ -26,6 +27,7 @@ static const void* _sharedDebugSetRetain(CFAllocatorRef allocator, const void *v
 static void _sharedDebugSetRelease(CFAllocatorRef allocator, const void *value) {
 }
 
+// 给target发消息
 void _sharedDebugSetFunction(const void *value, void *context) {
     id<YYTextDebugTarget> target = (__bridge id<YYTextDebugTarget>)(value);
     [target setDebugOption:_sharedDebugOption];
@@ -36,6 +38,7 @@ static void _initSharedDebug() {
     dispatch_once(&onceToken, ^{
         pthread_mutex_init(&_sharedDebugLock, NULL);
         CFSetCallBacks callbacks = kCFTypeSetCallBacks;
+        // 自定既定retain和release方法，实现弱引用
         callbacks.retain = _sharedDebugSetRetain;
         callbacks.release = _sharedDebugSetRelease;
         _sharedDebugTargets = CFSetCreateMutable(CFAllocatorGetDefault(), 0, &callbacks);
